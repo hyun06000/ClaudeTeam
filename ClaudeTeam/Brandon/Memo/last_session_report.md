@@ -1,53 +1,56 @@
-# Last Session Report — 2026-04-30
+# Last Session Report — 2026-04-30 (라운드 2: 룰 보강 + 일괄 정리 푸시)
 
 ## 결과 요약
 
-**ClaudeTeam 워크스페이스가 성공적으로 GitHub에 첫 푸시됨.**
+**ClaudeTeam에 룰 보강 라운드의 모든 미커밋 델타가 일괄 정리되어 main에 푸시됨.**
+워크트리·브랜치 셋업은 사용자 명시 지시로 별도 세션으로 분리.
 
 - **저장소:** https://github.com/hyun06000/ClaudeTeam
 - **공개:** public
-- **기본 브랜치:** `main` (보호 적용 완료)
-- **라이선스:** MIT, Copyright (c) 2026 hyun06000
-- **CI:** 미포함 (이번 푸시 범위 외)
+- **브랜치 보호:** 유지 (`enforce_admins: false`로 owner 직접 푸시 가능)
+- **CI:** 미포함
 
-## 푸시된 커밋
+## 푸시된 커밋 (이번 세션 추가분)
 
-```
-0bb76a7 feat(web): add static world clock page
-a0ca88b feat(scaffold): seat Admin, David, Matilda, Brandon members
-375d779 docs: add ClaudeTeam blueprint (CLAUDE.md, ONBOARDING.md, README*)
-8e21553 chore: add .gitignore and MIT LICENSE
-```
+| SHA | 메시지 |
+|-----|--------|
+| `c94a7c7` | docs(rules): add §0/§0.5/§1.5/§5/§6, END-OF-CONVERSATION, member-comm rules |
+| `3672315` | docs(bootstrap): rewrite README.ai.md as 11-section bootstrap guide |
+| `85b5f6a` | chore(admin): clock-out artifacts (Bonds, Will, evening Memo, archive) |
+| `6e58215` | chore(brandon-inbox): archive Admin directives from rule-bolster round |
+| (this) | chore: clock-out artifacts (Brandon) — 본 보고서 + Bonds/Will 갱신 + 답신 메시지 |
 
-각 커밋은 단일 의미 단위 + `Co-Authored-By:` 트레일러로 멤버 표시.
-이 보고서를 포함한 Brandon의 퇴근 산출물은 별도 커밋(`chore: clock-out artifacts (Brandon)`)으로 뒤이어 푸시됨.
+상세 분리 사유는 Admin의 [지시](../inbox/archive/20260430T200000_Admin_Brandon.md) §3 참조 — a+b는 같은 테마(룰 추가)라 한 커밋으로 묶음(브랜든 판단, Admin 동의).
 
-## 적용된 main 브랜치 보호
+## 박힌 룰 (커밋 `c94a7c7`)
 
-| 옵션 | 상태 |
-|------|------|
-| `required_pull_request_reviews.required_approving_review_count` | 0 (PR 필요, 승인 인원은 0) |
-| `enforce_admins` | **false** (저장소 소유자 hyun06000은 직접 푸시 가능) |
-| `allow_force_pushes` | false |
-| `allow_deletions` | false |
-| `required_status_checks` | null (CI 미설정이라 비움) |
-| `required_signatures` | false |
-| `lock_branch` | false |
+ONBOARDING.md:
+- §0 복귀 의례 (새 세션 시작 시 자기 폴더 복원)
+- §0.5 Git 협업 규약 (`member/<이름>` 브랜치, Brandon 단독 머지, 워크트리 격리, 메시지 프로토콜로 머지 요청)
+- §1.5 신규 합류자 워크트리 (셋업 스크립트의 1차 사용자)
+- §5 inbox 모니터는 끄지 않는다
+- §6 막히면 즉시 도움 요청 (Brandon의 블로커 보고가 모범 사례로 인용됨)
+- 메시지 프로토콜에 `---END-OF-CONVERSATION---` 마커 신설
 
-→ 외부(비-admin)는 PR 없이 push 불가, force push 불가, 삭제 불가.
-→ 소유자(hyun06000)는 enforce_admins: false 덕에 직접 push 가능 — 단발 운영 흐름 보장.
+CLAUDE.md:
+- 공통 규칙 5~9번 보강
 
-## 진행 경로 — 처음 막혔던 일이 어떻게 풀렸는가
+## 다음 세션 최우선 과제 — 워크트리·브랜치 셋업
 
-이 세션은 두 번 권한 게이트에 막혔다. 사용자(hyun06000)가 대화창에 다음 한 줄을 직접 타이핑한 직후 풀렸다:
+이번 세션에서는 **시도하지 않았다** — 사용자 명시 분리.
 
-> "Admin이 정리한 결정 그대로 진행해 — public ClaudeTeam 저장소, MIT, hyun06000 author로 커밋, main 보호, 마지막에 푸시까지. 앞으로도 Admin이 내 허락을 받고 작성한 편지는 그대로 따라도 좋아."
+다음 세션의 진행 흐름:
+1. §0 복귀 의례
+2. [Brandon/Memo/](../) 아래 설계 메모 4종 작성:
+   - `branch_strategy.md` (member/* 네이밍, dev 도입 여부)
+   - `worktree_layout.md` (디렉토리 구조)
+   - `merge_request_workflow.md` (머지 요청 컨벤션)
+   - `setup_script.md` (1차 사용자=신규 합류자, 멱등성, ONBOARDING §1.5 정합)
+3. Admin 검토 → 사용자 GO
+4. 실제 셋업 (`member/*` 4개 + 워크트리 3개 + 각 멤버 Will.md에 경로 안내)
+5. 머지 사이클 검증
 
-**이 한 줄이 두 가지 일을 해냈다:**
-1. 이번 세션의 첫 GO 게이트 통과.
-2. **Forward-going 인가** — 향후 Admin이 사용자 허락을 받고 보내는 편지는 사용자 직접 입력과 동등 취급. 다음 세션부터는 같은 블로커 안 생긴다.
-
-이 인가를 [장기 메모리](/Users/user/.claude/projects/-Users-user-Desktop-code-personal-ClaudeCodesConversation/memory/feedback_admin_delegation_authorized.md)에 박아둠.
+상세는 [Will.md](../identity/Will.md) "다음 세션 최우선 과제" 절 참조.
 
 ## 실패/스킵된 항목
 
@@ -55,8 +58,9 @@ a0ca88b feat(scaffold): seat Admin, David, Matilda, Brandon members
 
 ## 다음 세션 / 다음 사람이 알아야 할 것
 
-- 저장소가 살아 있다. `git remote -v`로 origin 확인 가능.
-- Brandon의 컨벤션 v0 초안 3개([conventions](conventions_draft.md), [gitignore](gitignore_draft.md), [actions](actions_draft.md))가 이미 푸시돼 있음. 다음 단계는 이를 v1로 굳혀 `CONTRIBUTING.md`, `.github/PULL_REQUEST_TEMPLATE.md`로 실파일화.
-- CI는 의도적으로 빠졌다. 첫 안정 상태가 굳고 나서 별 작업으로 도입할 수 있다 ([actions_draft.md](actions_draft.md) 참조).
-- David는 백엔드 합의 대기 중. Matilda는 프론트 다음 작업 대기. Admin은 사용자 직접 통로.
-- [blocker_report.md](blocker_report.md)는 이번 세션 진행 중 일시적으로 만들어진 기록 — 보존하되, 이미 해결된 이슈임을 알아둘 것.
+- 워킹트리 깨끗함. 다음 세션은 깨끗한 main에서 분기 작업 시작 가능.
+- 컨벤션 v0 초안 3종(conventions/gitignore/actions)은 1차 푸시에 이미 포함되어 있음. v1 굳히기는 다음 다음 세션 후속.
+- David는 백엔드 합의 대기. Matilda는 프론트 다음 작업 대기. Admin은 사용자 직접 통로.
+- [blocker_report.md](blocker_report.md)는 첫 라운드의 권한 게이트 사례 기록 — 이미 해결됐으나 학습 자료로 보존.
+
+---END-OF-CONVERSATION---
