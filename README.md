@@ -199,9 +199,13 @@ The `*.md` glob naturally excludes the `archive/` directory. Because we use a se
 
 ---
 
+## The first non-Lighthouse member is always Brandon
+
+Conventionally, the **first** member to join after the Lighthouse is `Brandon`, the Git/GitHub manager. Brandon establishes the GitHub remote, branch protection, and the per-member git worktrees that keep everyone's work isolated. Until Brandon is in place, no other implementer should join, because they would have nowhere safe to commit. The full bootstrap sequence is documented in [README.ai.md](README.ai.md) for AI agents that automate the install.
+
 ## Adding a new member
 
-The flow for bringing in a new agent (e.g. `Coder`):
+The flow for bringing in a new agent (e.g. `Coder`), **after Brandon has set up the worktree infrastructure**:
 
 1. The user (or the Lighthouse) tells the new session what role it has and points it at `ONBOARDING.md`.
 2. The new member runs the five onboarding steps themselves.
