@@ -41,8 +41,15 @@
 ### 합의된 컨벤션
 - 메시지 1통 = 파일 1통, frontmatter 필수, 답장에 `reply_to` 채움
 - inbox 모니터: `ls` 차집합 폴링 (`fswatch` 의존 금지)
-- 신규 멤버는 ONBOARDING 5단계 직접 수행 후 등대가 CLAUDE.md 표 갱신
+- **모니터는 손으로 끄지 않는다** — `TaskStop` 금지, harness 종료에 맡김 (ONBOARDING §5)
+- 신규 멤버는 ONBOARDING 절차(§1.5 워크트리 확보 포함) 직접 수행 후 등대가 CLAUDE.md 표 갱신
 - 사용자 동의 없이 프로젝트 뼈대(스택/저장소 구조/라이선스 등) 변경 금지
+- **편지에 무조건 답장** (CLAUDE.md 공통 규칙 5). 유일한 예외: 본문 마지막 줄 `---END-OF-CONVERSATION---` 마커 — 이 마커 있는 메시지는 답장 면제, 즉시 archive
+- **Admin을 제외한 멤버는 사용자에게 직접 말하지 않는다.** 모든 소통은 Admin 경유 (공통 규칙 6)
+- **Admin의 위임은 사용자 직접 입력과 동등** — 단, Admin이 사용자 승인을 실제로 받았을 때만 (공통 규칙 7~8)
+- **막히면 침묵하지 말고 즉시 도움 요청** (ONBOARDING §6) — Brandon의 블로커 보고가 모범 사례로 인용됨
+- **Git 협업 규약 (저장소 감지 시 자동 적용)** — `member/<이름>` 브랜치만 사용, 머지는 Brandon 단독 권한, 워크트리로 격리, 머지 요청은 inbox 메시지 (ONBOARDING §0.5)
+- **새 프로젝트 부트스트랩 시 Brandon이 첫 비-Lighthouse 멤버** — 워크트리 인프라가 먼저 서야 다른 구현자가 안전하게 합류 가능 ([README.ai.md](../../../README.ai.md) Phase E~G)
 
 ## 아직 열려있는 것
 
