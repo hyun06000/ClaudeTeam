@@ -33,9 +33,12 @@
 ### 핵심 원칙
 
 1. **개인 브랜치 강제.** 모든 멤버는 `member/<자기이름>` 브랜치에서만 작업한다. `main`(과 `dev`가 존재한다면 `dev`)에 직접 커밋·푸시하지 않는다.
-2. **머지는 Brandon 단독 권한.** `member/*` → `dev`(있다면) → `main` 머지는 Brandon만 수행한다.
-3. **Git worktree로 작업공간 격리.** 각 비-Brandon 멤버는 자기 브랜치를 별도 워크트리에 체크아웃하고 그 디렉토리에서만 작업한다. 다른 멤버의 브랜치 변경·체크아웃이 자기 인덱스에 영향을 주지 않게 한다.
-4. **머지 요청은 메시지 프로토콜로.** PR을 GitHub에 직접 만들지 말고, Brandon inbox에 머지 요청 메시지를 떨어뜨린다 — Brandon이 검토 후 PR 생성/머지/배포 수행.
+2. **로컬 git = Brandon, 원격 push = Admin.** 멤버는 자기 워크트리에서 로컬 commit까지만. Brandon은 워크트리 발급·브랜치 hygiene·MR 검증(FF/linear/diff/AC)·`gh` CLI(PR/issue/release/protection). **`git push origin ...`은 Admin이 실행** — Admin이 사용자 turn 안에서 작동해 하니스의 *current-turn user authorization* 체크와 정합. Brandon은 검증 통과 SHA를 Admin inbox로 핸드오프, push는 Admin이 직접. (이 분리는 마찰 감사 후 굳힌 규칙 — CLAUDE.md 규칙 10 참고.)
+3. **머지 흐름.** `member/*` → 검증(Brandon) → push to `main`(Admin). Brandon은 PR을 GitHub에 만들지 않고 inbox 메시지로 받아 검증 후 Admin에게 핸드오프.
+4. **Git worktree로 작업공간 격리.** 각 비-Brandon 멤버는 자기 브랜치를 별도 워크트리에 체크아웃하고 그 디렉토리에서만 작업한다. 다른 멤버의 브랜치 변경·체크아웃이 자기 인덱스에 영향을 주지 않게 한다.
+5. **Rebase-first commit.** 자기 부수 커밋(identity·Memo·inbox archive 등)을 만들기 **전에** 먼저 `git fetch origin && git rebase origin/main`으로 main을 따라잡고, 그 다음에 add/commit. 순서를 거꾸로 하면 자기 브랜치가 main보다 stale → push 단계에서 non-fast-forward → force-push 마찰. (시행착오로 굳힌 룰.)
+6. **inbox archive는 deletion 아닌 rename.** 처리한 메시지는 `git mv <file> archive/`로 이동. 단순 `rm`은 히스토리 추적/감사 손실.
+7. **예외 — `member/Brandon` `--force-with-lease`만 사전 자동.** Brandon이 자기 부수 커밋 정리 시 `member/Brandon` 브랜치 force-with-lease는 settings.local.json에 등록하면 자동. 다른 멤버 브랜치 force-push는 Admin도 매번 사용자 직접 GO 필요.
 
 ### 워크트리 레이아웃 (제안 — Brandon이 구현 시 확정)
 
@@ -103,13 +106,9 @@ Brandon은 답장으로 "승인 + 머지 완료(머지 커밋 SHA)" 또는 "수�
 
 ### 예외 / 단서
 
-- **첫 시드 커밋 / 컨벤션 문서**처럼 `main`에 직접 들어가야 하는 작업은 Brandon이 사용자 직접 GO 하에 수행한다 — 첫 푸시(2026-04-30)가 그 예.
-- **Admin 문서 작업** (CLAUDE.md, ONBOARDING.md, README*.md, identity/*, Memo/*)도 원칙적으로 `member/Admin` 브랜치에서 → 머지 요청. 단, 단순 오타 수정·표 갱신처럼 즉시성이 필요한 경우는 Brandon이 일괄 정리 시점을 정해 처리한다.
-- **Brandon 본인의 식별 자료**(자기 identity/, Memo/) 갱신은 Brandon이 자기 권한으로 메인 체크아웃에서 직접 커밋해도 된다. 다른 멤버의 브랜치를 손대지 않는 한 충돌 없음.
-
-### 구현 상태
-
-이 규약은 **2026-04-30에 합의되었으며 실제 워크트리·브랜치 셋업은 Brandon이 다음 세션에서 수행** 예정. 그 전까지는 단일 메인 체크아웃에서 작업하되 머지 요청 포맷은 동일하게 적용한다.
+- **첫 시드 커밋 / 컨벤션 문서**처럼 `main`에 직접 들어가야 하는 작업은 Admin이 main 워크트리에서 직접 commit + push (Admin convention/docs 예외).
+- **Admin 문서 작업** (CLAUDE.md, ONBOARDING.md, README*.md, 자기 identity/Memo) — Admin이 main 워크트리에서 직접 처리. 멤버 브랜치 거치지 않음.
+- **Brandon 본인의 식별 자료**(자기 identity/, Memo/) 갱신은 자기 워크트리에서 commit, push는 Admin에게 핸드오프 또는 직접 push (Brandon 자기 브랜치 한정 settings 등록 시).
 
 ---
 
@@ -141,18 +140,41 @@ ClaudeTeam/<자기이름>/
 
 `.git`이 감지되면 **§1의 폴더 생성도 워크트리 안에서** 해야 한다. 절차:
 
-1. 자기소개 메시지 한 통을 Brandon inbox로 먼저 보낸다 (ONBOARDING §3을 잠깐 앞당기는 셈) — 본문에 자기 이름·역할·"워크트리 셋업 요청"을 명시하고 `priority: high`.
-2. Brandon이 `member/<자기이름>` 브랜치 + `<parent>/ClaudeTeam-<자기이름>/` 워크트리를 생성하고 그 경로를 답장으로 알려준다.
-3. 답장이 오면 그 경로로 이동(`cd`)하고 거기서 §1을 수행 — `ClaudeTeam/<자기이름>/{identity/, inbox/, Memo/}` 생성, identity 세 파일 작성.
-4. 자기 변경분 커밋 → `git push origin member/<자기이름>` → Brandon에게 머지 요청 (§0.5 머지 요청 포맷).
-5. 그 다음 §2(모니터)·§3(자기소개 전체 발송)·§4(Memo) 진행.
-
-**Brandon이 자리에 없거나 응답이 늦으면**, 우회로:
-- 직접 `git switch -c member/<자기이름>` + `git worktree add ../ClaudeTeam-<자기이름> member/<자기이름>` 실행 (셋업 스크립트가 [Brandon/Memo/setup_script.md](ClaudeTeam/Brandon/Memo/) 에 있으면 그걸 사용).
-- Admin inbox에 "Brandon 부재로 자체 셋업, 사후 추인 요청" 메시지를 남긴다.
-- 사용자에게도 권한 게이트가 걸릴 수 있으니 막히면 즉시 보고.
+1. 자기소개 메시지 한 통을 Brandon inbox로 먼저 보낸다 (§3을 잠깐 앞당기는 셈) — 자기 이름·역할·"워크트리 셋업 요청" + `priority: high`.
+2. Brandon이 `member/<자기이름>` 브랜치 + `<parent>/ClaudeTeam-<자기이름>/` 워크트리 생성. 워크트리 경로의 자기 inbox에 환영 편지 drop **+ 즉시 main 커밋·핸드오프** (§1.6 deadlock 회피 의무).
+3. 답장이 오면 그 경로로 이동(`cd`) + 거기서 §1 수행 — `ClaudeTeam/<자기이름>/{identity/, inbox/, Memo/}` 생성, identity 세 파일 작성.
+4. 자기 변경분 commit (rebase-first 룰 §0.5 적용). push는 Admin에게 핸드오프 또는 머지 요청 메시지로.
+5. §2(모니터)·§3(자기소개 발송)·§4(Memo) 진행.
 
 이 절은 저장소가 없으면 통째로 건너뛴다.
+
+---
+
+## 1.6 inbox 디렉터리 + 모니터 — 두 단계 (워크트리 발급 전·후)
+
+**중요 — 두 path는 동일하지 않다.** main 워크트리(`<repo>/ClaudeTeam/<자신>/inbox/`)와 자기 워크트리(`ClaudeTeam-<자신>/ClaudeTeam/<자신>/inbox/`)는 같은 git 트리의 두 working copy일 뿐, **물리적으로 다른 디렉터리**다. commit하지 않은 직접 drop은 한쪽에서만 보인다 → monitor가 잘못된 path를 보면 못 잡는다 (시행착오로 굳힌 룰 — Phase 1↔2 전환 시 deadlock 빈발).
+
+**Phase 1 — 워크트리 발급 전**:
+1. main 워크트리 안의 `ClaudeTeam/<자신>/inbox/archive/`를 `mkdir -p`.
+2. monitor를 그 경로로 가동 (§2 폴링).
+3. Admin·사용자 측 commit된 메시지는 main에 들어가니 monitor가 잡는다.
+
+**Phase 2 — 워크트리 발급 직후 (Brandon이 worktree-issued 통보)**:
+1. **즉시 워크트리로 cd** (`/Users/.../ClaudeTeam-<자신>/`).
+2. **monitor 대상을 워크트리 경로로 이동** — 기존 main monitor stop, 워크트리 inbox에 새 monitor.
+3. 워크트리 inbox에 Brandon이 commit 없이 drop한 환영 편지가 untracked로 있을 수 있음 — 자기 부트스트랩 commit 시 함께 archive 후 add.
+
+**Brandon 측 책임**:
+- 새 멤버에게 워크트리 발급 시 환영 편지를 워크트리 경로에 drop 후 **즉시 commit + main 합류** (또는 Admin에게 push 핸드오프) — 그래야 발급 통지가 main monitor를 통해 회수 가능. drop만 하고 commit 안 하면 path 불일치로 deadlock.
+- 또는 Admin inbox에 "<X> 워크트리 발급 완료 + 환영 편지 워크트리에 drop" 한 줄을 동시에 보내면 Admin이 라우팅으로 풀 수 있음.
+
+**버전 싱크 시 deadlock 점검 의무 (Brandon)**:
+팀 sync 검증 시(예: 클락아웃 직전 final push 전) 단순히 SHA 정렬만 보지 말고, 다음 deadlock 신호도 점검:
+- 멤버 워크트리에 **untracked**로 남은 메시지 파일 (`git -C <worktree> status --short | grep '?? .*inbox/'`).
+- main path와 워크트리 path 사이 **commit되지 않은 차이** (특히 inbox/).
+- 멤버 monitor가 이미 죽었거나 잘못된 경로를 보고 있는 정황 (해당 멤버가 일정 시간 응답 없음 + drop된 메시지 존재).
+
+신호 발견 시 **본인 클락아웃·최종 push 전 Admin에게 priority: high 보고**. 미해소 deadlock 위에서 push하면 다음 세션에 같은 교착 재발생.
 
 ---
 
@@ -235,7 +257,29 @@ CLAUDE.md 공통 규칙 5~8번의 상세. 메시지 프로토콜이 *형식*이�
 - Admin은 권한 위임이나 크리티컬한 결정(저장소 초기화, 공개 푸시, 라이선스 결정, 외부 시스템 연결 등) 전에 **반드시 사용자 승인**을 받는다. 추측·가정으로 위임을 발사하지 않는다.
 - "사용자 승인 받았다"는 말은 사실이어야 한다. 등대의 신뢰는 이 한 줄로 유지된다.
 
-### 6) 막히면 도움을 요청한다 — 침묵하지 않는다
+### 6) 대기 모드 진입 시 알림 편지 의무 (CLAUDE.md 규칙 11)
+
+처리할 메시지 없음 + 자기 임무 진척 외 입력 대기 상태가 되면 **Admin inbox에 즉시 한 줄 편지**:
+
+```yaml
+---
+to: Admin
+from: <자신>
+priority: normal
+subject: "대기 중 — <기다리는 것 한 줄>"
+sent_at: <ISO8601>
+---
+
+작업: <지금까지 진척>.
+대기: <무엇을 기다리는가 — 메시지·결정·외부 시스템·시간 등>.
+다시 활성화될 조건: <자동 트리거가 무엇인지>.
+
+---END-OF-CONVERSATION---
+```
+
+이 편지가 없으면 Admin은 당신이 idle인지 작업 중인지 구별 못 한다. 다시 활성화될 때(예: 새 메시지 도착, 결정 도착) 이 편지는 자연 archive — 별도 정리 불필요.
+
+### 7) 막히면 도움을 요청한다 — 침묵하지 않는다
 
 - 작업이 막히거나, 권한 게이트에서 거부되거나, 사람의 손이 필요한 상황(예: 외부 인증, 사용자 직접 입력 필수)을 만나면 **즉시 Admin inbox로 보고**한다. `priority: high`로.
 - 본인 영역에서 해결되지 않는 일을 끌어안고 침묵하지 않는다. 시간 낭비이고, 다른 멤버에게도 손해다.
@@ -247,9 +291,9 @@ CLAUDE.md 공통 규칙 5~8번의 상세. 메시지 프로토콜이 *형식*이�
 - Admin은 그 보고를 받아 사용자에게 가져간다. 멤버는 사용자에게 직접 가지 않는다 — 단, **사용자가 너에게 직접 타이핑을 해야만 풀리는 게이트**(예: 권한 시스템)는 Admin이 사용자에게 그렇게 요청한다.
 - 이유: 막힘은 약점이 아니라 정보다. 빨리 공유될수록 빨리 해결된다.
 
-### 7) 작업 흐름 정합성
+### 8) 작업 흐름 정합성
 
-이 다섯 조항이 만드는 흐름:
+이 일곱 조항이 만드는 흐름:
 
 ```
 사용자 ↔ Admin ↔ (David / Matilda / Brandon / ...)

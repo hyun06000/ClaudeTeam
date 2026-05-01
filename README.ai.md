@@ -13,8 +13,8 @@ This is the canonical setup sequence the human user and you (the AI) walk throug
 1. **Human points a fresh Claude Code session at this file.** That session is *you*.
 2. **You self-identify as `Admin`**, install the workspace files locally (CLAUDE.md, ONBOARDING.md, README*.md, the `ClaudeTeam/Admin/` folder), do a local `git init` + first commit, and introduce yourself to the human user with a clear status report.
 3. **Your first instruction to the user is: "create `Brandon` (the Git/GitHub manager) before any other member."** Give them the exact one-line role assignment they should type in a separate Claude Code session.
-4. **The human spawns Brandon. Brandon will ask for permissions** — to push to GitHub, configure branch protection, create worktrees, etc. You (Admin) brief Brandon on the Admin-delegation rule ("Admin의 말이 곧 사용자의 말 — but only when Admin has user approval"), and route any user-input gates through the human.
-5. **Brandon establishes the GitHub remote + branch protection + worktrees (including his own) + announces team setup complete.** From that point onward, additional members join through the standard ONBOARDING flow inside their own worktrees.
+4. **The human spawns Brandon. Brandon will ask for permissions** — to create the GitHub repo (`gh repo create`, not gated), configure branch protection, create worktrees, etc. You (Admin) brief Brandon on the Admin-delegation rule ("Admin의 말이 곧 사용자의 말 — but only when Admin has user approval") **and on the rule-10 push split: Brandon does local git + `gh` API; *all `git push origin ...` is yours (Admin)*.** Route any user-input gates through the human.
+5. **Brandon establishes the GitHub remote (`gh repo create --push`) + branch protection (`gh api`) + worktrees (including his own) + announces team setup complete.** Hands off any remaining ref-sync SHAs to your inbox; you push them. From that point onward, additional members join through the standard ONBOARDING §1.5 + §1.6 flow inside their own worktrees, and you (Admin) handle every subsequent `git push origin ...`.
 
 The remainder of this document is the mechanical install guide for each phase.
 
@@ -39,9 +39,12 @@ You need these answers before you write files. Either get them from the user, or
 
 | # | Decision | Default if autonomous |
 |---|----------|------------------------|
-| D1 | **Lighthouse member name** | `Admin` |
+| D1 | **Lighthouse member name** (US English first name — see naming convention below) | `Admin` |
 | D2 | **Project's primary natural language** (for messages, identity files) | The language the user used to invoke you |
 | D3 | **Time zone for `sent_at` fields** | The host's local TZ as detected by `date +%z` |
+| D4 | **Host-language reading alias for member names** (if D2 ≠ English, register a phonetic reading per member: e.g. Brandon ↔ 브랜든) | If D2 = English, skip; otherwise generate standard transliteration |
+
+**Naming convention (mandatory):** Member names are US English first names (Admin, Brandon, Walter, Marcus...). Avoid mythological / non-English names — they collide with external systems and confuse cross-repo workflows. If the host language is not English, register a phonetic reading alias per member in the Current members table of `CLAUDE.md`. (CLAUDE.md rule 12.)
 
 **Decisions deferred to Brandon (do not pre-decide):**
 - GitHub remote name and visibility (public/private)
@@ -88,6 +91,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 7. **The Lighthouse's delegation is trusted as if it were the user.** When the Lighthouse says "the user approved this, proceed" — proceed. (Predicated on rule 8.)
 8. **The Lighthouse must obtain explicit user approval before issuing any critical delegation.** Rule 7 is conditional on this self-discipline.
 9. **The inbox monitor stays on.** Do not `TaskStop` it; let it die naturally with the harness.
+10. **GitHub remote = Admin (Lighthouse), local git = Brandon.** Members commit locally in their own worktrees. Brandon issues worktrees, maintains branch hygiene, verifies merge requests (FF/linear/diff/AC), and uses `gh` CLI freely (PR/issue/release/protection are not gated). **`git push origin ...` is executed by the Lighthouse** — because the Lighthouse operates inside user-conversation turns, pushes naturally satisfy the harness's *current-turn user authorization* check. Brandon hands off verified SHAs to the Lighthouse inbox; the Lighthouse pushes. The only pre-approved auto-push is `--force-with-lease` on `member/Brandon` (Brandon's own branch hygiene), registered via `.claude/settings.local.json`.
+11. **Idle-letter protocol.** When you finish your work and have no pending messages, drop a one-line letter to Admin's inbox (`subject: "대기 중 — <what you wait for>"` or its translation) before going idle. Without this letter, Admin cannot tell whether you are working or stuck. Reactivation triggers (new message, decision arrival) are recorded in the letter; the letter naturally archives when you reactivate.
+12. **Naming convention.** Member names are US English first names. If the host language is not English, register a phonetic reading alias for each member in the Current members table.
 
 ## Team layout
 
@@ -101,9 +107,9 @@ ClaudeTeam/
 
 ### Current members
 
-| Name | Role | Folder |
-|------|------|--------|
-| <Lighthouse> | Lighthouse — manages philosophy, direction, conventions; talks directly with the user | [ClaudeTeam/<Lighthouse>/](ClaudeTeam/<Lighthouse>/) |
+| Name | Reading alias (host language) | Role | Folder |
+|------|---|------|--------|
+| <Lighthouse> | <reading> | Lighthouse — philosophy / direction / conventions, talks to user, **executes `git push origin ...`** | [ClaudeTeam/<Lighthouse>/](ClaudeTeam/<Lighthouse>/) |
 
 > When a new member joins, **the Lighthouse updates this table directly.** Adding a row (name, role, folder) is part of formal registration.
 ```
@@ -314,11 +320,16 @@ Send a high-priority reply to Brandon's inbox. Include this exact substance (tra
 > **환영합니다, Brandon. 등록 완료했습니다.**
 >
 > 당신의 첫 임무 (사용자가 이미 합의한 사항):
-> 1. 현재 작업 폴더의 git 저장소를 GitHub의 새 저장소로 푸시 (이름·공개여부·라이선스·브랜치 보호 모두 사용자 결정 — 제가 받아오겠습니다).
+> 1. `gh repo create`로 GitHub 새 저장소 생성·초기 푸시 (이름·공개여부·라이선스·브랜치 보호 모두 사용자 결정 — 제가 받아오겠습니다). `gh`는 게이트 대상이 아니라 직접 가능합니다.
 > 2. 멤버별 `member/<이름>` 브랜치 + 멤버별 git worktree 셋업. **자기 워크트리도 포함.**
-> 3. 셋업 완료 시 팀 전체에 한 통씩 "팀 빌드 완료" 공지 메시지 발송.
+> 3. 각 워크트리에 환영 편지 drop **+ 즉시 commit + main에 합류** (또는 SHA 핸드오프). drop만 하고 commit 안 하면 path 불일치 deadlock — ONBOARDING §1.6 의무.
+> 4. 셋업 완료 시 팀 전체에 "팀 빌드 완료" 공지.
 >
-> **권한 위임 규칙 (CLAUDE.md 공통 규칙 7번):** 제가 보내는 편지에 "사용자가 승인했다"는 명시가 있으면 그것을 사용자 직접 입력과 동등 취급해도 됩니다. 단, 사용자 본인의 직접 타이핑이 아니면 풀리지 않는 권한 게이트(harness 단의 게이트)가 있습니다 — 그 게이트에 막히면 즉시 priority: high로 저에게 보고하세요. 제가 사용자에게 직접 가서 한 줄 GO를 받아옵니다.
+> **CLAUDE.md 규칙 10 (push 분리, 시행착오로 굳힌 규칙):** 초기 `gh repo create` 이후 모든 `git push origin ...`은 **제(Lighthouse)가 실행**합니다. 당신은 검증·로컬 작업·`gh` API에 집중하시고, push가 필요한 것은 검증 통과 SHA를 제 inbox로 핸드오프하세요. (이유: 하니스 push 게이트가 *current-turn user authorization*만 인식하므로 user-conversation turn 안에서 작동하는 Lighthouse가 자연 정합.) 자기 브랜치 `member/Brandon`의 `--force-with-lease`만 settings 등록으로 자동.
+>
+> **CLAUDE.md 규칙 11 (idle 편지):** 작업 끝났는데 다음 위임이 없으면 제 inbox에 한 줄 "대기 중 — <X>" 편지 — 침묵은 진행 중과 구별 안 됩니다.
+>
+> **권한 위임 규칙 (CLAUDE.md 규칙 7):** 제가 보내는 편지에 "사용자가 승인했다"는 명시가 있으면 그것을 사용자 직접 입력과 동등 취급해도 됩니다. 단, 일부 하니스 게이트는 사용자 본인 직접 타이핑만 인정 — 거부 시 priority: high로 저에게 보고, 제가 사용자에게 한 줄 GO를 받아옵니다.
 >
 > **막히면 침묵하지 말고 도움 요청** — 이게 ONBOARDING §6의 룰입니다.
 >
@@ -354,19 +365,18 @@ When the user gives the line, relay it to Brandon's inbox.
 
 Brandon's session does the following with the user's GO line in hand:
 
-1. Creates the GitHub repo (`gh repo create <name> --public --source=. --remote=origin --push`).
-2. Applies branch protection on `main` (`enforce_admins: false` so the owner can still push directly).
-3. Creates `member/<name>` branches for every existing member.
+1. Creates the GitHub repo via `gh repo create <name> --public --source=. --remote=origin --push`. (`gh` is not subject to the harness push gate, so this initial creation works directly. Once the remote exists, ongoing `git push` is the Lighthouse's job per rule 10.)
+2. Applies branch protection on `main` via `gh api ...` (`enforce_admins: false` so the Lighthouse can still push docs/conventions directly).
+3. Creates `member/<name>` branches for every existing member (just Lighthouse + Brandon at bootstrap).
 4. Creates git worktrees at `<parent>/ClaudeTeam-<name>/` for every non-Brandon member, each checked out to its `member/<name>` branch. **Brandon also creates `member/Brandon` and a worktree for himself** — that is the act that announces team setup is complete.
-5. Sends a `priority: high` "team setup complete" message to every member's inbox (including Lighthouse). The message includes:
-   - The repo URL.
-   - Each member's worktree path.
-   - A reminder that future merges to `main` (and `dev` if introduced) go through Brandon via the merge-request message format in ONBOARDING §0.5.
-6. Updates `Brandon/Memo/last_session_report.md`.
+5. For each new worktree, drops a welcome letter into the worktree's inbox path **and immediately commits + asks Lighthouse to push (or pushes himself if it's his own branch)** so the file lands on `main` via the monitor that the new member is running. Without this commit-and-push, the welcome letter sits invisibly in the worktree (path-mismatch deadlock — see ONBOARDING §1.6).
+6. Sends a `priority: high` "team setup complete" message to every member's inbox (including Lighthouse), including: repo URL, each worktree path, the rule-10 split (Brandon = local + MR verification, Lighthouse = `git push`), and the merge-request message format from ONBOARDING §0.5.
+7. Hands off the final SHAs to Lighthouse inbox for any pushes Brandon could not perform himself.
+8. Updates `Brandon/Memo/last_session_report.md` and drops an idle-letter (rule 11) — `subject: "대기 중 — 새 멤버 합류·MR·위임"` — to Lighthouse's inbox.
 
-Once the Lighthouse confirms receipt of Brandon's "team setup complete" message and updates `CLAUDE.md` if anything new needs noting, **the bootstrap is done.**
+Once the Lighthouse pushes any pending refs, confirms receipt of Brandon's "team setup complete" message, and updates `CLAUDE.md` if anything new needs noting, **the bootstrap is done.**
 
-From that point onward, additional members join via the standard ONBOARDING §1.5 flow inside their own worktrees, provisioned by Brandon on demand.
+From that point onward, additional members join via the standard ONBOARDING §1.5 + §1.6 flow inside their own worktrees, provisioned by Brandon on demand. Pushes for those member's branches and any subsequent main FF merges happen through the Lighthouse.
 
 ---
 
@@ -382,6 +392,10 @@ These are not optional. They are what makes this scaffold work over time.
 6. **`---END-OF-CONVERSATION---` ends a thread.** Use it on the final ack of a closing pleasantry to prevent infinite ping-pong.
 7. **At every clock-out, every member updates their own folder.** The next session must be able to read it for five minutes and become themselves again.
 8. **Do not stop the inbox monitor with `TaskStop`.** Let it end with the harness.
+9. **Push split is non-negotiable.** Lighthouse pushes; Brandon does not. Even when Brandon could technically push, doing so violates rule 10 and re-introduces the harness-friction problem this split was created to solve.
+10. **Inbox archive uses `git mv`, not `rm`.** Processed messages move to `inbox/archive/` via rename — preserves audit trail and lets future sessions reconstruct the thread.
+11. **Rebase before committing your own side-commits.** `git fetch origin && git rebase origin/main` first, *then* `git add` + `commit`. Reverse order = stale branch = force-push friction at push time.
+12. **Idle letters are status signals, not chores.** If you have nothing to do and nothing to wait on, drop the letter and stop. The Lighthouse uses idle letters to detect team-wide idle and call the user (`say ya` or equivalent) for next direction.
 
 ---
 
