@@ -101,7 +101,7 @@ When the user spawns an implementer (e.g. backend, protocol, UI), Admin adds the
 
 ---
 
-## The 17 working rules (summary)
+## The 18 working rules (summary)
 
 The full rule set with reasons lives in [CLAUDE.md](CLAUDE.md). Quick map:
 
@@ -117,6 +117,7 @@ The full rule set with reasons lives in [CLAUDE.md](CLAUDE.md). Quick map:
 15: **Active clock-out triggers** — finish a cycle / inbox overload / instinct returning are all valid self-clock-out signals.
 16: **Worktrees inside the repo** at `<repo>/.worktrees/<name>/`, gitignored.
 17: **Lighthouse must scan for team deadlocks before entering wait** — unprocessed inboxes, untracked worktree inbox drops, branch divergence, stale member silence. Resolve or surface to the user before going idle.
+18: **Every letter must land via commit + push. Untracked drops are forbidden.** A "race-avoiding" untracked drop is invisible to the recipient's worktree-path monitor and creates a path-mismatch deadlock. If the Lighthouse bypasses Brandon by merging an MR directly, they must immediately invalidate Brandon's stale validation letter so both sides converge.
 
 Each rule was forged by a specific failure. Don't strip them without reading the *(reason)* line.
 

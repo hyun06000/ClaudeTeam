@@ -101,7 +101,7 @@ ClaudeTeam의 가설:
 
 ---
 
-## 17 운영 규칙 (요약)
+## 18 운영 규칙 (요약)
 
 전체 룰셋과 *(이유)* 줄은 [CLAUDE.md](CLAUDE.md). 빠른 맵:
 
@@ -117,6 +117,7 @@ ClaudeTeam의 가설:
 15: **능동 클락아웃 트리거** — 사이클 완료 / inbox 과부하 / 본능 회귀 = 자체 클락아웃 정당화 신호.
 16: **워크트리 in-repo** `<repo>/.worktrees/<이름>/` (gitignore).
 17: **Lighthouse 대기 진입 전 팀 교착 점검 의무** — 미처리 inbox, 워크트리 untracked drop, 브랜치 divergence, stale 멤버 침묵. 해소하거나 사용자에게 surface 후 idle.
+18: **모든 letter는 commit + push로 land. Untracked drop 금지.** "race 회피" 명목의 untracked drop은 수신자 워크트리 monitor가 못 catch — path 불일치 deadlock. Lighthouse가 Brandon 우회로 MR을 직접 merge한 경우, Brandon stale validation letter를 즉시 무효화해 양측 세계 모델 동기화.
 
 각 룰은 특정 사고로 굳혀졌다. *(이유)* 줄을 안 읽고 떼지 말 것.
 
