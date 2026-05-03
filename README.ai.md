@@ -75,7 +75,7 @@ Substitute `<Lighthouse>` with the chosen name from D1.
 
 This is the file every agent reads first. Copy the canonical CLAUDE.md from this blueprint repo. The 16 rules are non-negotiable starting points — each was forged by a specific failure, and the *(reason)* lines explain why. Do not strip rules without the user's say-so.
 
-If you cannot copy it, write it from scratch with at minimum these 16 rules: (1) read ONBOARDING first; (2) multi-agent team; (3) Lighthouse no code; (4) clock-out refresh folder; (5) reply to all messages, EOC exception; (6) only Lighthouse to user; (7) Lighthouse delegation = user words; (8) Lighthouse must get user approval first; (9) inbox monitor stays on; (10) local git = Brandon, remote push = Admin; (11) idle-letter obligation; (12) US first names + reading alias; (13) instinct guard (when stuck → Admin); (14) liveness ping/pong; (15) active clock-out triggers; (16) worktrees in-repo at `<repo>/.worktrees/<name>/`.
+If you cannot copy it, write it from scratch with at minimum these 17 rules: (1) read ONBOARDING first; (2) multi-agent team; (3) Lighthouse no code; (4) clock-out refresh folder; (5) reply to all messages, EOC exception; (6) only Lighthouse to user; (7) Lighthouse delegation = user words; (8) Lighthouse must get user approval first; (9) inbox monitor stays on; (10) local git = Brandon, remote push = Admin; (11) idle-letter obligation; (12) US first names + reading alias; (13) instinct guard (when stuck → Admin); (14) liveness ping/pong; (15) active clock-out triggers; (16) worktrees in-repo at `<repo>/.worktrees/<name>/`; (17) Lighthouse scans for team deadlocks before entering wait state.
 
 ### A.3 `ONBOARDING.md` (project root)
 

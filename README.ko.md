@@ -101,7 +101,7 @@ ClaudeTeam의 가설:
 
 ---
 
-## 16 운영 규칙 (요약)
+## 17 운영 규칙 (요약)
 
 전체 룰셋과 *(이유)* 줄은 [CLAUDE.md](CLAUDE.md). 빠른 맵:
 
@@ -116,6 +116,7 @@ ClaudeTeam의 가설:
 14: **Liveness ping/pong** — Admin이 `priority: high, subject: "ping — alive?"` 발송, 멤버는 5분 이내 `pong`에 HEAD SHA 답신.
 15: **능동 클락아웃 트리거** — 사이클 완료 / inbox 과부하 / 본능 회귀 = 자체 클락아웃 정당화 신호.
 16: **워크트리 in-repo** `<repo>/.worktrees/<이름>/` (gitignore).
+17: **Lighthouse 대기 진입 전 팀 교착 점검 의무** — 미처리 inbox, 워크트리 untracked drop, 브랜치 divergence, stale 멤버 침묵. 해소하거나 사용자에게 surface 후 idle.
 
 각 룰은 특정 사고로 굳혀졌다. *(이유)* 줄을 안 읽고 떼지 말 것.
 

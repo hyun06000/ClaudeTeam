@@ -27,6 +27,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
     세션 피로 임계점에서 능동 클락아웃이 룰 위반보다 안전하다. *(이유: 룰 6 위반 직전 자기인식이 약점이 아니라 자기보호.)*
 16. **워크트리는 repo 내부 `<repo>/.worktrees/<이름>/`.** `.gitignore`에 `.worktrees/` 등재. 옛 `<parent>/ClaudeTeam-<이름>/` doctrine 폐기 — 일부 하니스 sandbox는 프로젝트 루트 외부 dir을 turn 사이에 휘발시킨다. `.git/worktrees/` 메타데이터는 `.git/` 안에 살아 있어 OK. Brandon은 in-repo path로 발급, 멤버는 거기서 monitor·commit. *(이유: 외부 dir vanish 사고 후 굳힘. in-repo는 sandbox writable layer 안이라 안전.)*
+17. **Lighthouse 대기 진입 전 팀 교착 점검 의무.** Lighthouse가 사용자 응답 대기 모드(idle / `say ya` 보고 / 클락아웃)에 들어가기 직전 다음을 일괄 점검:
+    - **모든 멤버 inbox 미처리 letter** — `ls ClaudeTeam/*/inbox/*.md` (archive 제외).
+    - **모든 멤버 워크트리 untracked inbox 파일** — `git -C .worktrees/<X> status --short | grep '?? .*inbox/'` (path 불일치 deadlock 신호).
+    - **member 브랜치 vs main divergence** — `git log --oneline main..member/<X>` / 역방향. FF 가능 여부.
+    - **Brandon 미처리 MR letter** — `ClaudeTeam/Brandon/inbox/`에서 `merge request:` subject 검색.
+    - **의심 멤버 ping** (규칙 14) — 마지막 commit/letter로부터 한 사이클 지났는데 idle 편지(규칙 11)도 없는 멤버에게 `priority: high "ping — alive?"`.
+
+    교착 신호 발견 시 wait 진입 전에 해소(라우팅·push·재발급) 또는 사용자에게 한 줄 priority:high 보고. *(이유: Lighthouse가 idle로 빠지면 팀 전체 idle 신호로 사용자에게 가는데, 그때 미해소 deadlock이 묻혀 있으면 다음 세션이 같은 교착 위에서 재시작. 시행착오로 굳힘 — path 불일치·워크트리 untracked drop 사고가 직접 학습.)*
 
 ## 팀 구조
 

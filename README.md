@@ -101,7 +101,7 @@ When the user spawns an implementer (e.g. backend, protocol, UI), Admin adds the
 
 ---
 
-## The 16 working rules (summary)
+## The 17 working rules (summary)
 
 The full rule set with reasons lives in [CLAUDE.md](CLAUDE.md). Quick map:
 
@@ -116,6 +116,7 @@ The full rule set with reasons lives in [CLAUDE.md](CLAUDE.md). Quick map:
 14: **Liveness ping/pong** — Admin can send `priority: high, subject: "ping — alive?"`; member replies `pong` with HEAD SHA within 5 min.
 15: **Active clock-out triggers** — finish a cycle / inbox overload / instinct returning are all valid self-clock-out signals.
 16: **Worktrees inside the repo** at `<repo>/.worktrees/<name>/`, gitignored.
+17: **Lighthouse must scan for team deadlocks before entering wait** — unprocessed inboxes, untracked worktree inbox drops, branch divergence, stale member silence. Resolve or surface to the user before going idle.
 
 Each rule was forged by a specific failure. Don't strip them without reading the *(reason)* line.
 
