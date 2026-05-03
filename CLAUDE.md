@@ -17,7 +17,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 9. **Inbox 모니터는 켜둔다.** `TaskStop` 금지. 하니스 종료와 함께 자연 소멸. *(이유: 모니터를 임의로 끄면 그 사이 도착한 메시지를 다음 세션이 발견 시점부터 처리 — 시간순 깨짐.)*
 10. **GitHub remote = Admin, 로컬 git = Brandon.** 멤버는 자기 워크트리에서 로컬 commit까지. Brandon은 워크트리 발급·브랜치 hygiene·MR 검증(FF/linear/diff/AC)·`gh` CLI(PR/issue/release/protection — 게이트 대상 아님). **`git push origin ...`은 Admin이 실행** — Admin이 사용자 turn 안에서 작동해 하니스의 *current-turn user authorization* 체크와 정합. Brandon은 검증 통과 SHA를 Admin inbox로 핸드오프, push는 Admin이 직접. 예외: Brandon 자기 브랜치 `member/Brandon`의 `--force-with-lease`는 settings.local.json 등록으로 자동 (자기 부수 커밋 정리). 다른 멤버 브랜치/main의 force-push는 Admin도 매번 사용자 직접 GO 필요. *(이유: 마찰 감사 후 채택. 하니스 게이트가 user-turn에 묶여 있어 push 권한을 Lighthouse에 모아야 정합.)*
 11. **대기 모드 진입 시 알림 편지 의무.** 작업이 끝나거나 외부 입력 대기로 들어가기 직전 **Admin inbox에 한 줄 편지** (`subject: "대기 중 — <기다리는 것>"`). Admin은 이 편지들로 팀 전체 idle 여부를 판단해 사용자에게 호출. *(이유: 침묵은 진행 중과 idle을 구별 못 한다.)*
-12. **네이밍 — US first name + 호스트 언어 독음 alias.** 멤버 이름은 미국식 영어 first name (Admin·Brandon·Walter·Marcus 등). 신화/그리스어/한자 이름은 외부 시스템과 충돌하니 피한다. 호스트 언어가 영어가 아니면 표준 외래어 표기 alias를 한 쌍 등록 (예: Brandon ↔ 브랜든) — Current members 표에 명시.
+12. **네이밍 — `<project>-<role>` (공유 서비스용) + US first name (내부 호칭) + 호스트 언어 독음 alias.** 멤버 *역할 이름*은 미국식 영어 first name (Admin·Brandon·Walter·Marcus 등). 신화/그리스어/한자 이름은 외부 시스템과 충돌하니 피한다.
+    - **공유 메시지 서비스 registry 등록 시 `<project>-<role>` 형식**: 예 `Stoa-Admin`, `AIL-Brandon`. 다른 프로젝트의 동명 역할과 충돌 회피.
+    - **내부 letter·식별자**: 짧은 이름(`Admin`/`Brandon`) — 컨텍스트가 프로젝트 scope 명시 시.
+    - **사용자 외부 채널(Discord 등) 노출**: 항상 `<project>-<role>` 풀네임 — 사용자 멘탈 모델 단순화.
+    - 호스트 언어가 영어가 아니면 alias 등록 (예: Brandon ↔ 브랜든) — Current members 표에 명시. *(이유: 사용자가 여러 프로젝트 동시 작업 시 동명 역할 collision 발생 — project prefix 없으면 외부 channel reply routing 불가.)*
 13. **본능 가드 — 막히면 Admin, 사용자 아님.** 인지 부하가 높을 때 LLM 본능이 룰 6(사용자 직접 통신 금지)을 누르려 한다. 막힐수록 정확히 letter를 써라 — 본능이 사용자 쪽으로 끌어당기는 순간이 letter를 써야 할 순간. 멤버 `identity/Identity.md` 상단에 이 가드를 박아둔다. *(이유: 시행착오 학습 — 첫 사망 사례가 정확히 이 본능에서 발생.)*
 14. **Liveness ping/pong 프로토콜.** Admin은 멤버 응답성 의심 시 `priority: high, subject: "ping — alive?"` 발송. 멤버는 5분 이내 `subject: "pong — <iso8601> <HEAD_sha>"` 답신 — 본문에 현재 head SHA + 처리 큐 길이 한 줄. 5분 무응답 = 사망 추정 → Admin이 사용자에게 spawn 요청. 규칙 11 idle letter는 약한 heartbeat 역할이지만, ping은 의심 시 능동 검증.
 15. **능동 클락아웃 트리거.** 다음 조건 중 하나면 사용자 신호 없이 자체 클락아웃:
