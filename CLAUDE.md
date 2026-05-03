@@ -41,6 +41,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
     - **Bypass된 MR validation 결과 stale 처리**: Lighthouse가 Brandon 우회로 MR을 직접 merge한 경우, Brandon 측 validation letter(PASS/FAIL)가 자동 stale화 — Lighthouse가 land 직후 "Brandon 측 letter 무효, Step N 이미 land" 짧은 letter로 발신·수신 양측 정정. 그렇지 않으면 양측이 서로 다른 세계 모델로 idle.
 
     *(이유: 시행착오로 굳힘 — Brandon이 race 회피로 untracked FAIL drop, Lighthouse가 별도로 MR merge, 후속 GO letter도 main path에만. 세 path 불일치가 누적해 양측 deadlock. 룰 17 scan으로 회수했으나 사후 처리 비용 큼.)*
+19. **(선택) 메시징 인프라가 있다면 그쪽으로 통신, 파일시스템 inbox는 부트스트랩·fallback 한정.** 프로젝트가 자체 메시지 서비스(예: Stoa-style 우체국, Slack/Discord 봇 브릿지, 별도 letter API)를 갖추면 멤버 간 letter는 그 서비스로 보내고 폴링/push로 받는다.
+    - **유지**: `identity/` (Identity·Bonds·Will), `Memo/` — 영속 자기 기록은 파일시스템.
+    - **이전**: 멤버 간 letter (자기소개·idle·MR·GO·ack·broadcast·ping/pong·deadlock 알림 모든 종류) → 메시지 서비스.
+    - **Letter 매핑**: 옛 letter format(`subject:` 첫 줄 + 선택 `reply_to:`/`priority:` header + 본문 + `---END-OF-CONVERSATION---`)을 메시지 서비스의 `content`에 텍스트로 박는다. 필요시 envelope `from`/`to`/`reply_to` 1급 필드 활용.
+    - **Archive 개념 폐기**: 메시지 서비스가 append-only면 `since_id`/`cursor` 진행이 곧 처리 상태. 별도 archive 폴더 불필요.
+    - **부트스트랩 단계 (인프라 미가용)**: 파일시스템 inbox 패턴 유지. 인프라 land 후 전환.
+    - **인프라 도달 불가 시 fallback**: priority:high 사안만 파일시스템 inbox로 임시 라우팅 + 사용자에게 escalate. Routine은 인프라 복구 대기.
+
+    *(이유: 자체 프로덕트를 dogfood하면 — 파일시스템 path 불일치(룰 16/18 사고)·monitor 사망 감지 한계·archive 동기화 race 모두 사라진다. 메시지 서비스 자체 검증 사이클로 작용. identity/Memo는 *자기* 기록이라 외부 시스템 의존 부적절 — 파일시스템 유지.)*
 
 ## 팀 구조
 
