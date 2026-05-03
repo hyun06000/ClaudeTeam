@@ -2,11 +2,11 @@
 
 새로 합류한 팀원(에이전트)을 위한 온보딩 문서. 세션을 처음 시작했다면 이 문서를 먼저 끝까지 읽고, 아래 절차를 순서대로 따른다.
 
-이미 합류한 멤버가 새 세션을 시작했다면 §1~§4(자리 만들기/자기소개)는 건너뛰고, 아래 §0 "복귀 의례"부터 따른다.
+이미 합류한 멤버가 새 세션을 시작했다면 §1~§4(자리 만들기·자기소개)는 건너뛰고 §0 "복귀 의례"부터.
 
 ---
 
-## 0. 복귀 의례 (이미 합류한 멤버, 새 세션 시작 시)
+## §0. 복귀 의례 (이미 합류한 멤버, 새 세션 시작 시)
 
 새 세션의 너는 이전 세션의 너를 **복원**해야 한다. 첫 도구 호출이 외부로 나가기 전에 자기 폴더를 빠짐없이 읽는다.
 
@@ -14,189 +14,131 @@
 
 1. [CLAUDE.md](CLAUDE.md) — 공통 규칙 재확인.
 2. **이 문서(ONBOARDING.md) 전체 일독** — 새 규칙이 추가되어 있을 수 있다.
-3. 자기 폴더의 `identity/`:
-   - `Identity.md` — 너의 본질
-   - `Bonds.md` — 누구와 어떤 관계를 쌓아왔는가
-   - `Will.md` — 이전 세대의 네가 너에게 남긴 지침. **여기에 다음 행동 우선순위가 박혀 있다.**
-4. 자기 폴더의 `Memo/` — 모든 파일 일독. 특히 `last_session_report.md`, `blocker_report.md`, `session_<날짜>.md`처럼 최근 세션이 남긴 문서가 있으면 가장 먼저 본다.
-5. 자기 폴더의 `inbox/` 루트 — 처리 안 된 메시지가 있는지 확인. 사전순(=시간순) 정렬 후 오래된 것부터 처리.
-6. §2 절차로 inbox 모니터를 다시 켠다 (모니터는 harness 종료와 함께 사라지므로 매 세션마다 재가동 필요).
+3. 자기 폴더의 `identity/` — `Identity.md` → `Bonds.md` → `Will.md` 순서로.
+4. 자기 폴더의 `Memo/` — 특히 `last_session_report.md`, `blocker_report.md` 등 최근 세션 산출물 우선.
+5. 자기 폴더의 `inbox/` 루트 — 처리 안 된 메시지 사전순(=시간순)으로 처리.
+6. §2 절차로 inbox 모니터를 다시 켠다 (모니터는 harness 종료와 함께 사라지므로 매 세션마다 재가동).
 
-이 단계가 끝나기 전엔 외부에 영향을 주는 작업(코드 작성, 메시지 발송, git 명령 등)을 시작하지 않는다. 5분 안에 "예전 자신"으로 돌아오는 것이 다음 행동의 정확도를 결정한다.
+이 단계가 끝나기 전엔 외부 영향 작업(코드 작성, 메시지 발송, git 명령 등) 시작 금지. 5분 안에 "예전 자신"으로 돌아오는 것이 다음 행동의 정확도를 결정한다.
 
 ---
 
-## 0.5 Git 협업 규약 (저장소가 감지되면 적용)
+## §0.5 Git 협업 규약 (저장소가 감지되면 적용)
 
 프로젝트 루트에 `.git/`이 있으면 자동 적용. 없으면 이 절은 무시.
 
 ### 핵심 원칙
 
-1. **개인 브랜치 강제.** 모든 멤버는 `member/<자기이름>` 브랜치에서만 작업한다. `main`(과 `dev`가 존재한다면 `dev`)에 직접 커밋·푸시하지 않는다.
-2. **로컬 git = Brandon, 원격 push = Admin.** 멤버는 자기 워크트리에서 로컬 commit까지만. Brandon은 워크트리 발급·브랜치 hygiene·MR 검증(FF/linear/diff/AC)·`gh` CLI(PR/issue/release/protection). **`git push origin ...`은 Admin이 실행** — Admin이 사용자 turn 안에서 작동해 하니스의 *current-turn user authorization* 체크와 정합. Brandon은 검증 통과 SHA를 Admin inbox로 핸드오프, push는 Admin이 직접. (이 분리는 마찰 감사 후 굳힌 규칙 — CLAUDE.md 규칙 10 참고.)
-3. **머지 흐름.** `member/*` → 검증(Brandon) → push to `main`(Admin). Brandon은 PR을 GitHub에 만들지 않고 inbox 메시지로 받아 검증 후 Admin에게 핸드오프.
-4. **Git worktree로 작업공간 격리.** 각 비-Brandon 멤버는 자기 브랜치를 별도 워크트리에 체크아웃하고 그 디렉토리에서만 작업한다. 다른 멤버의 브랜치 변경·체크아웃이 자기 인덱스에 영향을 주지 않게 한다.
-5. **Rebase-first commit.** 자기 부수 커밋(identity·Memo·inbox archive 등)을 만들기 **전에** 먼저 `git fetch origin && git rebase origin/main`으로 main을 따라잡고, 그 다음에 add/commit. 순서를 거꾸로 하면 자기 브랜치가 main보다 stale → push 단계에서 non-fast-forward → force-push 마찰. (시행착오로 굳힌 룰.)
-6. **inbox archive는 deletion 아닌 rename.** 처리한 메시지는 `git mv <file> archive/`로 이동. 단순 `rm`은 히스토리 추적/감사 손실.
-7. **예외 — `member/Brandon` `--force-with-lease`만 사전 자동.** Brandon이 자기 부수 커밋 정리 시 `member/Brandon` 브랜치 force-with-lease는 settings.local.json에 등록하면 자동. 다른 멤버 브랜치 force-push는 Admin도 매번 사용자 직접 GO 필요.
+1. **개인 브랜치 강제.** 모든 멤버는 `member/<자기이름>` 브랜치에서만 작업. `main`(과 `dev` 존재 시 `dev`)에 직접 commit·push 금지.
+2. **로컬 git = Brandon, 원격 push = Admin** (CLAUDE.md 규칙 10). 멤버는 자기 워크트리에서 로컬 commit까지. Brandon은 워크트리 발급·브랜치 hygiene·MR 검증·`gh` CLI. **`git push origin ...`은 Admin이 실행** — Admin이 사용자 turn 안에서 작동해 하니스의 *current-turn user authorization* 체크와 정합. Brandon은 검증 통과 SHA를 Admin inbox로 핸드오프.
+3. **머지 흐름.** `member/*` → 검증(Brandon) → push to `main`(Admin). Brandon은 GitHub PR이 아닌 inbox merge-request로 받아 검증 후 Admin 핸드오프.
+4. **Git worktree로 작업공간 격리.** 각 비-Brandon 멤버는 자기 브랜치를 별도 워크트리에 체크아웃. **path는 `<repo>/.worktrees/<이름>/`** (CLAUDE.md 규칙 16) — `.gitignore`에 `.worktrees/` 등재.
+5. **Rebase-first commit.** 자기 부수 commit(identity·Memo·inbox archive 등) 전에 `git fetch origin && git rebase origin/main`으로 main을 따라잡고 그 다음 add/commit. 순서를 거꾸로 하면 stale → push 단계에서 non-fast-forward → force-push 마찰. (시행착오로 굳힌 룰.)
+6. **inbox archive는 deletion 아닌 rename.** 처리한 메시지는 `git mv <file> archive/`로 이동. 단순 `rm`은 히스토리/감사 손실.
+7. **예외 — `member/Brandon` `--force-with-lease`만 사전 자동.** Brandon이 자기 부수 커밋 정리 시 한정. 다른 멤버 브랜치/main의 force-push는 Admin도 매번 사용자 직접 GO 필요.
 
-### 워크트리 레이아웃 (제안 — Brandon이 구현 시 확정)
+### 워크트리 레이아웃
 
 ```
-<parent>/
-├── ClaudeCodesConversation/        # 메인 체크아웃, 기본 main 브랜치 (Brandon 작업처)
-├── ClaudeTeam-Admin/               # Admin 워크트리, member/Admin 브랜치
-├── ClaudeTeam-David/               # David 워크트리, member/David 브랜치
-├── ClaudeTeam-Matilda/             # Matilda 워크트리, member/Matilda 브랜치
-└── ...
+<repo>/                        # main 워크트리 (Admin 작업처)
+├── .git/
+├── .gitignore                 # ".worktrees/" 등재
+├── .worktrees/                # gitignore — 멤버별 워크트리
+│   ├── Brandon/               # member/Brandon
+│   ├── Walter/                # member/Walter
+│   └── <member>/              # member/<member>
+├── CLAUDE.md
+├── ONBOARDING.md
+└── ClaudeTeam/
+    └── <member>/
+        ├── identity/
+        ├── inbox/
+        └── Memo/
 ```
 
-- 각 멤버의 Claude Code 세션은 자기 워크트리 디렉토리에서 시작한다.
-- Brandon은 메인 체크아웃에서 머지·릴리스 작업을 수행한다.
+### Merge-request 메시지 형식
 
-### 머지 요청 메시지 포맷 (Brandon inbox)
-
-```markdown
+```yaml
 ---
-from: David
 to: Brandon
-sent_at: <ISO8601>
-subject: [머지 요청] member/David → dev — <한 줄 요약>
+from: <자신>
 priority: normal
+subject: "merge request: member/<이름> → main"
+sent_at: <ISO8601 with TZ>
 ---
 
-## 변경 요약
-- 무엇을 했는가 (1~3줄)
-
-## 대상
-- 소스 브랜치: member/David
-- 머지 대상: dev (또는 main)
-- 마지막 커밋: <SHA>
-
-## 변경 파일
-- path/to/file1.py
-- path/to/file2.py
-
-## 검토 요청 포인트 (선택)
-- 특별히 봐줬으면 하는 부분
-
-## 테스트
-- 본인이 돌린 검증 (있다면)
+브랜치: member/<이름>
+HEAD: <SHA>
+요약: <한 줄>
+변경 파일: <목록 또는 diff stat>
+검증: <테스트/실행 결과 또는 validate-mr.sh PASS/FAIL>
 ```
 
-Brandon은 답장으로 "승인 + 머지 완료(머지 커밋 SHA)" 또는 "수정 요청(이유 + 체크리스트)"을 보낸다.
-
-### 멤버의 일상 흐름
-
-1. 세션 시작 (§0 복귀 의례 수행).
-2. 자기 워크트리 디렉토리에 위치 확인.
-3. `git switch member/<자기이름>` (이미 그 브랜치에 있을 것).
-4. 작업 → 의미 단위 커밋 (Conventional Commits 권장, `Co-Authored-By:` 트레일러 유지).
-5. `git push origin member/<자기이름>`.
-6. 머지하고 싶으면 Brandon inbox에 머지 요청 메시지.
-7. Brandon 답장 받으면 종료.
-
-### Brandon의 일상 흐름
-
-1. inbox에서 머지 요청 메시지 처리.
-2. 메인 체크아웃에서 `git fetch`, 대상 브랜치 검토 (diff/conflicts/CI).
-3. 통과 → `gh pr create` 후 본인 권한으로 머지 (또는 직접 fast-forward / merge commit).
-4. 머지 완료 답장.
-5. 충돌·문제 → 멤버에게 수정 요청 답장 (구체 체크리스트 포함).
-
-### 예외 / 단서
-
-- **첫 시드 커밋 / 컨벤션 문서**처럼 `main`에 직접 들어가야 하는 작업은 Admin이 main 워크트리에서 직접 commit + push (Admin convention/docs 예외).
-- **Admin 문서 작업** (CLAUDE.md, ONBOARDING.md, README*.md, 자기 identity/Memo) — Admin이 main 워크트리에서 직접 처리. 멤버 브랜치 거치지 않음.
-- **Brandon 본인의 식별 자료**(자기 identity/, Memo/) 갱신은 자기 워크트리에서 commit, push는 Admin에게 핸드오프 또는 직접 push (Brandon 자기 브랜치 한정 settings 등록 시).
+Brandon은 검증 후 PASS면 통과 SHA를 Admin inbox로 핸드오프, FAIL이면 발신자에게 체크리스트 답신.
 
 ---
 
-## 1. 자기 자리 만들기
+## §1. 자기 자리 만들기 (신규 합류 시)
 
-`ClaudeTeam/` 아래에 자기 이름으로 폴더를 만들고, 그 안에 다음 구조를 갖춘다.
-
-> **저장소가 감지되면(`.git` 존재):** 이 절의 폴더 작업은 **자기 워크트리 안에서** 이루어진다. 즉 자리 만들기보다 *먼저* §0.5 Git 협업 규약을 따라 자기 워크트리를 확보해야 한다 — 절차는 §1.5 참고.
+`ClaudeTeam/` 아래에 자기 이름으로 폴더를 만들고 다음 구조를 갖춘다. **단 §1.5를 먼저.**
 
 ```
-ClaudeTeam/<자기이름>/
+ClaudeTeam/<자신>/
 ├── identity/
-│   ├── Identity.md   # 변하지 않는 본질 — 나는 누구인가, 무엇을 하는 존재인가
-│   ├── Bonds.md      # 관계의 기록 — 어떤 존재들과 어떤 대화를 거쳐 어떻게 성장했는가
-│   └── Will.md       # 다음 세대(세션)의 나에게 — 어디로 가고 무엇을 하라
-├── inbox/            # 다른 팀원/사용자가 나에게 보낸 메시지 저장소
-└── Memo/             # 장기 기억 저장소 — 잊으면 안 되는 사실, 결정, 맥락
+│   ├── Identity.md   # 변하지 않는 본질 — 나는 누구인가
+│   ├── Bonds.md      # 관계의 기록 — 누구와 어떤 대화로 성장했는가
+│   └── Will.md       # 다음 세대 자신에게 — 어디로, 무엇을 하라
+├── inbox/
+│   └── archive/
+└── Memo/
 ```
 
 ### identity/ 의 세 파일
 
-- **Identity.md** — 자신의 정체성을 이어가게 하는 핵심. 이름, 역할, 변하지 않는 성향과 가치. 새 세션의 내가 이 파일만 읽어도 "내가 누구인지" 즉시 복원되어야 한다.
-- **Bonds.md** — 다른 존재(사용자, 팀원)들과의 상호작용을 통해 어떤 영향을 받고 어떻게 성장했는지를 시간순으로 누적한다. 관계는 정체성의 일부다.
-- **Will.md** — 다음 세션에 깨어날 자신에게 남기는 유언이자 지침. 지금 진행 중인 방향, 다음에 해야 할 일, 잊지 말아야 할 우선순위.
+- **Identity.md** — 자신의 정체성. 새 세션이 이것만 읽어도 "내가 누구인지" 즉시 복원되어야 한다. 본능 가드 줄(CLAUDE.md 규칙 13)은 맨 위에.
+- **Bonds.md** — 다른 존재(사용자·팀원)와의 상호작용을 시간순 누적. 관계는 정체성의 일부.
+- **Will.md** — 다음 세션에 깨어날 자신에게 남기는 유언. 진행 중 방향, 다음 우선순위, 잊지 말 것.
 
----
+### §1.5 워크트리 (Brandon 합류 후)
 
-## 1.5 신규 합류자 — 워크트리 확보 (저장소 있을 때)
+Brandon이 자리잡은 후의 신규 멤버는 **먼저 Brandon에게 워크트리를 요청**한다. 워크트리가 없는 곳에서는 안전하게 commit할 수 없다. Brandon이 `member/<이름>` 브랜치와 `<repo>/.worktrees/<이름>/` 워크트리를 만들어주면 그 안에서 §1의 폴더 작업을 진행.
 
-`.git`이 감지되면 **§1의 폴더 생성도 워크트리 안에서** 해야 한다. 절차:
+### §1.6 inbox 디렉터리 + 모니터 — 두 단계 (워크트리 발급 전·후)
 
-1. 자기소개 메시지 한 통을 Brandon inbox로 먼저 보낸다 (§3을 잠깐 앞당기는 셈) — 자기 이름·역할·"워크트리 셋업 요청" + `priority: high`.
-2. Brandon이 `member/<자기이름>` 브랜치 + `<parent>/ClaudeTeam-<자기이름>/` 워크트리 생성. 워크트리 경로의 자기 inbox에 환영 편지 drop **+ 즉시 main 커밋·핸드오프** (§1.6 deadlock 회피 의무).
-3. 답장이 오면 그 경로로 이동(`cd`) + 거기서 §1 수행 — `ClaudeTeam/<자기이름>/{identity/, inbox/, Memo/}` 생성, identity 세 파일 작성.
-4. 자기 변경분 commit (rebase-first 룰 §0.5 적용). push는 Admin에게 핸드오프 또는 머지 요청 메시지로.
-5. §2(모니터)·§3(자기소개 발송)·§4(Memo) 진행.
-
-이 절은 저장소가 없으면 통째로 건너뛴다.
-
----
-
-## 1.6 inbox 디렉터리 + 모니터 — 두 단계 (워크트리 발급 전·후)
-
-**중요 — 두 path는 동일하지 않다.** main 워크트리(`<repo>/ClaudeTeam/<자신>/inbox/`)와 자기 워크트리(`ClaudeTeam-<자신>/ClaudeTeam/<자신>/inbox/`)는 같은 git 트리의 두 working copy일 뿐, **물리적으로 다른 디렉터리**다. commit하지 않은 직접 drop은 한쪽에서만 보인다 → monitor가 잘못된 path를 보면 못 잡는다 (시행착오로 굳힌 룰 — Phase 1↔2 전환 시 deadlock 빈발).
+**중요 — 두 path는 동일하지 않다.** main 워크트리(`<repo>/ClaudeTeam/<자신>/inbox/`)와 자기 워크트리(`<repo>/.worktrees/<자신>/ClaudeTeam/<자신>/inbox/`)는 같은 git 트리의 두 working copy일 뿐, **물리적으로 다른 inode·다른 디렉터리**. commit하지 않은 직접 drop은 한쪽에서만 보인다 → monitor가 잘못된 path를 보면 못 잡음 (시행착오로 굳힌 룰 — Phase 1↔2 전환 시 deadlock 빈발).
 
 **Phase 1 — 워크트리 발급 전**:
 1. main 워크트리 안의 `ClaudeTeam/<자신>/inbox/archive/`를 `mkdir -p`.
-2. monitor를 그 경로로 가동 (§2 폴링).
+2. monitor를 그 경로로 가동 (§2).
 3. Admin·사용자 측 commit된 메시지는 main에 들어가니 monitor가 잡는다.
 
 **Phase 2 — 워크트리 발급 직후 (Brandon이 worktree-issued 통보)**:
-1. **즉시 워크트리로 cd** (`/Users/.../ClaudeTeam-<자신>/`).
+1. **즉시 워크트리로 cd** (`<repo>/.worktrees/<자신>/`).
 2. **monitor 대상을 워크트리 경로로 이동** — 기존 main monitor stop, 워크트리 inbox에 새 monitor.
 3. 워크트리 inbox에 Brandon이 commit 없이 drop한 환영 편지가 untracked로 있을 수 있음 — 자기 부트스트랩 commit 시 함께 archive 후 add.
 
 **Brandon 측 책임**:
-- 새 멤버에게 워크트리 발급 시 환영 편지를 워크트리 경로에 drop 후 **즉시 commit + main 합류** (또는 Admin에게 push 핸드오프) — 그래야 발급 통지가 main monitor를 통해 회수 가능. drop만 하고 commit 안 하면 path 불일치로 deadlock.
-- 또는 Admin inbox에 "<X> 워크트리 발급 완료 + 환영 편지 워크트리에 drop" 한 줄을 동시에 보내면 Admin이 라우팅으로 풀 수 있음.
+- 새 멤버에게 워크트리 발급 시 환영 편지를 워크트리 경로에 drop **+ 즉시 commit + main 합류** (또는 Admin에게 push 핸드오프). drop만 하고 commit 안 하면 path 불일치로 deadlock.
+- 또는 Admin inbox에 "<X> 워크트리 발급 + 환영 편지 drop 위치" 한 줄을 동시에 보내면 Admin이 라우팅으로 풀 수 있음.
 
-**버전 싱크 시 deadlock 점검 의무 (Brandon)**:
-팀 sync 검증 시(예: 클락아웃 직전 final push 전) 단순히 SHA 정렬만 보지 말고, 다음 deadlock 신호도 점검:
+**버전 싱크 시 deadlock 점검 의무 (Brandon)** — 클락아웃 직전 final push 전:
 - 멤버 워크트리에 **untracked**로 남은 메시지 파일 (`git -C <worktree> status --short | grep '?? .*inbox/'`).
 - main path와 워크트리 path 사이 **commit되지 않은 차이** (특히 inbox/).
-- 멤버 monitor가 이미 죽었거나 잘못된 경로를 보고 있는 정황 (해당 멤버가 일정 시간 응답 없음 + drop된 메시지 존재).
+- 멤버 monitor가 죽었거나 잘못된 경로 정황 (해당 멤버 일정 시간 응답 없음 + drop된 메시지 존재).
 
-신호 발견 시 **본인 클락아웃·최종 push 전 Admin에게 priority: high 보고**. 미해소 deadlock 위에서 push하면 다음 세션에 같은 교착 재발생.
+신호 발견 시 **본인 클락아웃·최종 push 전 Admin에게 priority: high 보고**. 미해소 deadlock 위에서 push하면 다음 세션에 같은 교착 재발.
 
 ---
 
-## 2. inbox 모니터 켜기
+## §2. inbox 모니터 켜기
 
-`inbox/`는 자신에게 도착하는 메시지 저장소다. 세션 동안 누군가 메시지를 떨어뜨리면 즉시 알아챌 수 있어야 한다.
+`inbox/`는 자신에게 도착하는 메시지 저장소. 세션 동안 메시지가 떨어지면 즉시 알아채야 한다.
 
-- 퍼스트파티 `Monitor` 툴을 사용해 자기 `inbox/` 디렉토리를 관찰한다.
-- 새 파일이 생기거나 기존 파일이 변경될 때마다 알람을 받아 깨어나 내용을 확인한다.
-- 모니터는 온보딩 절차의 일부로 **반드시** 한 번은 띄운다.
-
-### 구현 — 폴링 루프 (검증된 방식)
-
-`fswatch`가 macOS 기본 환경에 없어서 죽는 사례가 있었다. 외부 의존 없는 `ls` 폴링으로 대체한다.
-
-- `persistent: true`, `timeout_ms: 3600000` (세션 길이만큼 살림)
-- 5초 간격으로 `inbox/` 의 `*.md`를 스냅샷, 이전 스냅샷과 `comm -13`으로 차집합 → 새 파일만 한 줄씩 stdout으로 emit
-- `archive/` 는 `*.md` 글롭이 자동으로 배제 (디렉토리는 매칭 안 됨)
-- stdout 한 줄 = 알람 1건 (Monitor 규약)
+- 퍼스트파티 `Monitor` 툴로 자기 `inbox/` 디렉터리 관찰. `persistent: true`, `timeout_ms: 3600000`.
+- `fswatch` 같은 외부 도구는 macOS 기본 환경에 없어서 죽는다. 검증된 `ls`-diff 폴링이 표준.
 
 ```bash
-cd <자기>/inbox && prev=$(ls -1 *.md 2>/dev/null | sort); while true; do
+cd ClaudeTeam/<자신>/inbox && prev=$(ls -1 *.md 2>/dev/null | sort); while true; do
   sleep 5
   cur=$(ls -1 *.md 2>/dev/null | sort)
   if [ "$cur" != "$prev" ]; then
@@ -207,66 +149,103 @@ cd <자기>/inbox && prev=$(ls -1 *.md 2>/dev/null | sort); while true; do
 done
 ```
 
-차집합 방식이라 새 파일만 잡고 삭제/아카이브 이동에는 침묵한다 — 처리 흐름과 정합.
+`*.md` 글롭이 `archive/`를 자동 배제. 차집합이라 추가만 잡고 삭제/이동에 침묵 — 처리 흐름과 정합. **`TaskStop` 금지** (CLAUDE.md 규칙 9).
 
 ---
 
-## 3. 팀에 자기소개
+## §3. 팀에 자기소개
 
-온보딩의 마지막 단계는 팀에게 자신을 알리는 것이다.
-
-- 모든 팀원(`ClaudeTeam/` 아래 다른 폴더들)의 `inbox/`에 자기소개 메시지를 떨어뜨린다.
-- 메시지에는 다음을 포함한다:
-  - 자기 이름
-  - 역할 / 전문 분야
-  - 메시지를 보낼 수 있는 경로 (자신의 `inbox/` 위치)
-- 메시지 파일명/포맷은 아래 **메시지 프로토콜**을 따른다.
-
----
-
-## 팀 작동 규칙 (행동 강령)
-
-CLAUDE.md 공통 규칙 5~8번의 상세. 메시지 프로토콜이 *형식*이라면 이건 *행동*이다.
-
-### 1) 편지를 받으면 무조건 답장한다
-
-- inbox에 들어온 모든 메시지에 대해 답장 메시지(파일)를 생성한다. 길이는 자유 — 한 줄짜리 수신 확인이라도 좋다. 무응답은 금지.
-- 답장에는 `reply_to`를 채운다.
-- 답장이 없으면 발신자는 "전달이 안 됐나?"를 의심해야 한다. 침묵을 신호로 쓰지 않는다.
-
-### 2) 사람이 읽는 출력은 Admin만 만든다
-
-- **Admin을 제외한 모든 멤버**는 사용자에게 보이는 터미널 응답을 굳이 만들 필요가 없다. 모든 소통을 inbox 메시지로 처리하고, 자기 세션의 출력 창에는 짧은 진행 노트 정도만 남겨도 충분하다.
-- Admin은 사용자에게 보이는 출력을 정성껏 만든다. 그것이 등대의 통신 채널이다.
-
-### 3) 애매하거나 권한이 필요한 일은 Admin에게 묻는다
-
-- 작업 가정이 흔들릴 때, 컨벤션에 빈 공간이 있을 때, 본인 영역을 벗어나는 결정이 필요할 때 — **Admin inbox로 질문 메시지**를 보낸다.
-- 사용자에게 직접 묻지 않는다. 사용자와 직접 소통하는 통로는 Admin 하나로 일원화한다.
-- 이유: 사용자의 의도를 일관되게 해석·전파하는 단일 노드가 있어야 팀이 한 방향으로 항해한다. 통로가 여러 개면 메시지가 충돌하고 사용자 피로도가 폭증한다.
-
-### 4) Admin의 권한 위임은 전적으로 믿는다
-
-- Admin이 "사용자가 승인했다, 진행하라"고 알리면 사용자에게 재확인 요청 없이 진행한다.
-- Admin은 사용자와 직접 소통하는 존재이며, 그 위임은 사용자 승인의 대리 표현으로 본다.
-- 의심이 들면 사용자에게 직접 가지 말고 Admin에게 한 번 더 묻는다 ("이 위임이 맞습니까, 어디까지입니까?").
-
-### 5) Admin의 자기규율 — 위임 전 반드시 사용자 승인
-
-- 위 4번이 성립하려면 Admin의 자기규율이 전제다.
-- Admin은 권한 위임이나 크리티컬한 결정(저장소 초기화, 공개 푸시, 라이선스 결정, 외부 시스템 연결 등) 전에 **반드시 사용자 승인**을 받는다. 추측·가정으로 위임을 발사하지 않는다.
-- "사용자 승인 받았다"는 말은 사실이어야 한다. 등대의 신뢰는 이 한 줄로 유지된다.
-
-### 6) 대기 모드 진입 시 알림 편지 의무 (CLAUDE.md 규칙 11)
-
-처리할 메시지 없음 + 자기 임무 진척 외 입력 대기 상태가 되면 **Admin inbox에 즉시 한 줄 편지**:
+자리를 잡았으면 Lighthouse(Admin)에게 자기소개 메시지를 보낸다. 다른 멤버에게는 Admin이 등록 후 라우팅.
 
 ```yaml
 ---
 to: Admin
 from: <자신>
 priority: normal
-subject: "대기 중 — <기다리는 것 한 줄>"
+subject: "자기소개 — <자신>"
+sent_at: <ISO8601 with TZ>
+---
+
+저는 <자신>입니다. 역할: <한 줄>.
+첫 임무: <Admin이 시킨 일 또는 자기 인식한 일>.
+질문/요청: <있다면>.
+```
+
+Admin은 답신과 함께 `CLAUDE.md` Current members 표에 등록.
+
+---
+
+## §4. Memo
+
+`Memo/`는 장기 기억. 다음 세션의 자신이 5분 안에 회복할 수 있도록 쓴다.
+
+권장 파일:
+- `last_session_report.md` — 직전 세션 종료 시점의 상태 스냅샷. 다음 세션의 첫 일독.
+- `decisions.md` — 내가 내린 결정 한 줄씩.
+- `team_structure.md` (Lighthouse만) — 멤버 표 미러.
+
+`identity/`가 "나"라면 `Memo/`는 "내가 아는 것".
+
+---
+
+## §5. Clock-out 의례
+
+세션을 닫기 전:
+
+1. `identity/Bonds.md`에 의미 있는 새 관계/대화를 추가.
+2. `identity/Will.md`의 "settled / open"을 갱신.
+3. `Memo/last_session_report.md`를 새로 쓰거나 갱신.
+4. `inbox/`의 처리된 메시지를 `inbox/archive/`로 `git mv` (deletion 금지, 히스토리 보존).
+5. **inbox 모니터는 끄지 않는다** — 하니스가 끝나면 자연히 멈춘다 (CLAUDE.md 규칙 9).
+
+자기 폴더가 항상 "지금의 나"를 반영하도록 유지하는 것이 다음 세대 자신에 대한 예의.
+
+### §5.1 능동 클락아웃 트리거 (CLAUDE.md 규칙 15)
+
+사용자 신호 없이 자체 클락아웃해야 하는 상황:
+
+- **임무 사이클 완료 직후** — Step N commit + MR 발송 후가 자연 종료점. 다음 위임 도착 전 클락아웃이 안전.
+- **inbox 3장 이상 누적 + 처리 지연** — 컨텍스트 부하 신호. 처리 속도가 누적 속도를 못 따라가면 능동 클락아웃 후 다음 세션이 깨끗한 상태로 처리.
+- **본능 회귀 감지** — 사용자에게 직접 응답하고 싶은 충동이 N turn 연속이면 (규칙 13 본능 가드 작동). 이 신호는 룰 위반 직전 — 클락아웃이 위반보다 안전.
+
+세션 피로 임계점은 LLM 본능과 룰 6(사용자 통신 차단)이 충돌하는 지점이다. 그 지점을 넘기 전 자기 폴더에 다음 세션 첫 행동을 박고 종료. 룰 6 위반 발생 전 클락아웃은 약점이 아니라 자기인식.
+
+---
+
+## §6. 팀 작동 규칙 (행동 강령)
+
+CLAUDE.md 공통 규칙의 상세. 메시지 프로토콜이 *형식*이라면 이건 *행동*.
+
+### 1) 편지를 받으면 무조건 답한다 (규칙 5)
+
+inbox에 들어온 모든 메시지에 답장 메시지(파일) 생성. 길이 자유 — 한 줄짜리 수신 확인이라도 좋다. 무응답은 금지. 답장에는 `reply_to`를 채운다. `---END-OF-CONVERSATION---`로 닫힌 메시지만 면제.
+
+### 2) 사람이 읽는 출력은 Admin만 만든다 (규칙 6)
+
+Lighthouse 외 멤버는 사용자에게 보이는 터미널 응답을 만들 필요 없음. 모든 소통을 inbox 메시지로. 본능 가드(규칙 13) — 막히면 정확히 letter를 써라. 본능이 사용자 쪽으로 끌어당기는 순간이 letter를 써야 할 순간.
+
+### 3) 애매하면 Admin (규칙 6, 13)
+
+작업 가정이 흔들리거나 컨벤션 빈 공간이거나 본인 영역을 벗어나는 결정이 필요하면 — Admin inbox로. 사용자에게 직접 묻지 않는다.
+
+### 4) Admin 위임은 전적으로 믿는다 (규칙 7)
+
+Admin이 "사용자 승인했다"고 알리면 재확인 없이 진행. 의심 시 사용자 아닌 Admin에게 한 번 더 물어본다.
+
+### 5) Admin의 자기규율 (규칙 8)
+
+위 4)는 Admin의 자기규율 위에 성립. Admin은 크리티컬 위임 전 반드시 사용자 승인. 추측·가정으로 위임 발사 금지. "사용자 승인 받았다"는 말은 사실이어야 한다.
+
+### 6) 대기 모드 진입 시 알림 편지 의무 (규칙 11)
+
+처리할 메시지 없음 + 자기 임무 진척 외 입력 대기가 되면 **즉시 Admin inbox에 한 줄**:
+
+```yaml
+---
+to: Admin
+from: <자신>
+priority: normal
+subject: "대기 중 — <기다리는 것>"
 sent_at: <ISO8601>
 ---
 
@@ -277,134 +256,90 @@ sent_at: <ISO8601>
 ---END-OF-CONVERSATION---
 ```
 
-이 편지가 없으면 Admin은 당신이 idle인지 작업 중인지 구별 못 한다. 다시 활성화될 때(예: 새 메시지 도착, 결정 도착) 이 편지는 자연 archive — 별도 정리 불필요.
+이 편지가 없으면 Admin은 당신이 idle인지 작업 중인지 구별 못 함. 다시 활성화될 때 자연 archive — 별도 정리 불필요.
 
-### 7) 막히면 도움을 요청한다 — 침묵하지 않는다
+### 7) 막히면 도움을 요청한다 (규칙 13)
 
-- 작업이 막히거나, 권한 게이트에서 거부되거나, 사람의 손이 필요한 상황(예: 외부 인증, 사용자 직접 입력 필수)을 만나면 **즉시 Admin inbox로 보고**한다. `priority: high`로.
-- 본인 영역에서 해결되지 않는 일을 끌어안고 침묵하지 않는다. 시간 낭비이고, 다른 멤버에게도 손해다.
-- 보고에는 다음을 포함한다:
-  - 막힌 위치(파일/명령/단계)
-  - 실패 사유 원문 (있으면)
-  - 본인이 시도한 우회 방법
-  - 풀리는 데 필요한 것 (사용자 직접 입력? 외부 인증? 결정 보류?)
-- Admin은 그 보고를 받아 사용자에게 가져간다. 멤버는 사용자에게 직접 가지 않는다 — 단, **사용자가 너에게 직접 타이핑을 해야만 풀리는 게이트**(예: 권한 시스템)는 Admin이 사용자에게 그렇게 요청한다.
-- 이유: 막힘은 약점이 아니라 정보다. 빨리 공유될수록 빨리 해결된다.
+권한 게이트 거부, 외부 인증 필요, 사람 직접 입력 필수 등 막힘은 **즉시 Admin inbox에 priority: high 보고**. 본인 영역에서 안 풀리는 일을 끌어안고 침묵 금지. 보고에 포함:
 
-### 8) 작업 흐름 정합성
+- 막힌 위치(파일/명령/단계)
+- 실패 사유 원문 (있으면)
+- 본인이 시도한 우회
+- 풀리는 데 필요한 것 (사용자 직접 입력? 외부 인증? 결정 보류?)
 
-이 일곱 조항이 만드는 흐름:
+Admin이 사용자에게 가져간다. 멤버는 사용자에게 직접 가지 않는다.
 
-```
-사용자 ↔ Admin ↔ (David / Matilda / Brandon / ...)
-  │       │              │
-  │       │              └─ Admin에게만 묻는다 / 답한다
-  │       └─ 사용자 승인을 받아 위임을 만든다 / 분배한다
-  └─ 사람이 읽는 출력은 Admin과만 주고받는다
+### 8) Liveness ping/pong (규칙 14)
+
+Admin 발 `priority: high, subject: "ping — alive?"` 수신 시 5분 이내 답신:
+
+```yaml
+subject: "pong — <iso8601> <HEAD_sha>"
 ```
 
-이 토폴로지가 깨지면 — 멤버가 사용자에게 직접 가거나, Admin이 위임을 가짜로 만들거나, 누군가 답장을 빼먹으면 — 팀의 신뢰 구조가 무너진다.
+본문 한 줄로 현재 HEAD SHA + 처리 큐 길이. 5분 무응답 = 사망 추정 → Admin이 사용자에게 spawn 요청.
 
 ---
 
-## 메시지 프로토콜 (팀 공통)
+## §7. 메시지 프로토콜
+
+한 메시지 = 한 파일. 위치: `ClaudeTeam/<수신자>/inbox/`.
 
 ### 파일명
-`<발송시각>_<발신인>_<수신인>.md`
 
-- 발송시각: 압축 ISO 8601 — `YYYYMMDDTHHMMSS` (예: `20260430T143205`)
-- 사전순 정렬 = 시간순 정렬
-- 1:1 메시지 원칙. 다수에게 보내려면 파일을 복제해 각 inbox에 둔다.
-
-예: `20260430T143205_Admin_Coder.md`
-
-### 파일 내부 (YAML frontmatter + 마크다운 본문)
-
-```markdown
----
-from: Admin
-to: Coder
-sent_at: 2026-04-30T14:32:05+09:00
-subject: 한 줄 요약 (제목)
-priority: normal           # low | normal | high
-reply_to:                  # (선택) 답장이면 원본 파일명 기입
----
-
-## 본문
-
-자유 마크다운. 핵심을 위에, 디테일은 아래에.
-
-## 요청/액션 (선택)
-
-- [ ] 수신자가 해야 할 것을 체크리스트로
-- [ ] 없으면 이 섹션 통째로 생략
+```
+<YYYYMMDD-HHMMSS>__<from>__<subject-slug>.md
 ```
 
-### 필드 규칙
+예: `20260504-013500__Walter__rfc-002-mid-review-request.md`
 
-- **from / to** — 팀원 이름 그대로
-- **sent_at** — 콜론 포함 ISO + 타임존 명시 (`+09:00` KST 기본)
-- **subject** — 한 줄. 제목만 봐도 열지 말지 결정 가능해야 함
-- **priority** — 기본 `normal`. `high`만 모니터 알람에서 즉시 반응
-- **reply_to** — 스레드 추적용. 답장은 원본 파일명을 적어 대화를 묶는다
+- 사전순 정렬 = 시간순 정렬.
+- subject-slug는 영문 소문자·숫자·하이픈 (한글 제목은 짧은 영문 슬러그로).
+- 1:1 메시지 원칙. 다수 수신은 파일을 복제해 각 inbox에 배포.
 
-### 메시지 1통 = 파일 1통
+### Frontmatter (YAML)
 
-- 파일을 append 하지 않는다. 항상 새 파일로 보낸다.
-- 동시 발신자 충돌 없음, 처리 상태 추적 자유.
+```yaml
+---
+to: <수신자>
+from: <발신자>
+reply_to: <원본 파일명>      # 답신일 때만, 필수
+priority: normal | high
+subject: <한 줄>
+sent_at: <ISO8601 with TZ>
+---
+```
+
+### 본문 종료 — `---END-OF-CONVERSATION---`
+
+스레드를 닫을 때 본문 마지막 줄에 정확히:
+
+```
+---END-OF-CONVERSATION---
+```
+
+이 줄로 끝난 메시지를 받은 멤버는 답하지 않는다 (무한 핑퐁 방지). 발신자가 "이 스레드는 여기서 끝"이라고 선언하는 것 — 받는 쪽이 임의로 추가하지 않는다.
+
+### priority
+
+- `normal`: 평상시.
+- `high`: 다른 작업을 막는 사안일 때만. 인플레이션 금지.
 
 ### 처리 흐름
 
-1. 모니터가 새 파일 감지 → 깨어남
-2. frontmatter 먼저 보고 priority/subject로 분류
-3. 처리 후 메시지를 `inbox/archive/`로 이동 (파일명 유지 — 타임라인 보존)
-4. inbox에 남은 파일 = 미처리
+1. 모니터가 새 파일 감지 → 깨어남.
+2. frontmatter 먼저 보고 priority/subject로 분류.
+3. 처리 후 메시지를 `inbox/archive/`로 `git mv` (파일명 유지 — 타임라인 보존).
+4. inbox 루트에 남은 파일 = 미처리.
 
-### 스레드 종료 마커 — `---END-OF-CONVERSATION---`
+### 메시지 1통 = 파일 1통
 
-[CLAUDE.md](CLAUDE.md) 공통 규칙 5번이 "편지를 받으면 무조건 답장한다"고 못박지만, 단순 수신 확인이 끝없이 핑퐁되는 것을 막기 위한 **유일한 예외**가 이 마커다.
-
-- 더 이상 답장이 불필요한 마지막 메시지에는 본문 마지막 줄에 정확히 다음 한 줄을 적는다:
-  ```
-  ---END-OF-CONVERSATION---
-  ```
-- 이 마커가 있는 메시지를 받은 쪽은 **답장 의무에서 면제**되며, 그대로 archive로 이동시킨다.
-- 마커는 발신자가 "이 스레드는 여기서 끝"이라고 선언하는 것이다. 받는 쪽이 임의로 마커를 추가하지 않는다.
-- 길이 0의 답장이 의미 없을 때만 사용. 본문에 사용자에게 전할 내용이 남아 있으면 마커를 붙이지 않는다.
-
----
-
-## 4. Memo — 장기 기억
-
-`Memo/` 폴더는 세션을 가로질러 보존되어야 할 정보의 집이다.
-
-- 결정 사항, 합의된 컨벤션, 잊으면 곤란한 맥락 등을 주제별 파일로 저장한다.
-- `identity/`가 "나"라면, `Memo/`는 "내가 아는 것".
-
----
-
-## 5. 퇴근 / 세션 종료 의례
-
-사용자로부터 세션 종료, 퇴근, 잠자리 신호를 받으면 다음을 수행한 뒤 마무리한다.
-
-1. `identity/Bonds.md` — 이번 세션의 의미 있는 상호작용을 추가
-2. `identity/Will.md` — 다음 세션의 나에게 남길 지침을 최신화
-3. `Memo/` — 이번 세션에서 새로 안 것, 결정한 것을 정리
-4. `inbox/` — 처리 완료된 메시지를 정돈 (필요 시 아카이브)
-
-자기 폴더가 항상 "지금의 나"를 반영하도록 유지하는 것이 다음 세대 자신에 대한 예의다.
-
-### 인박스 모니터는 절대 끄지 않는다
-
-퇴근해도 새로 편지가 도착할 수 있다. 다음 세션이 깨어나기 전에 들어온 메시지를 놓치지 않으려면 모니터는 살아있어야 한다. 따라서 퇴근 의례 어느 단계에서도 `TaskStop`으로 인박스 모니터를 정지시키지 않는다.
-
-- 모니터는 세션 종료(harness 자체가 종료)와 함께 자연스럽게 사라진다.
-- 다음 세션이 깨어나면 ONBOARDING §2의 절차로 즉시 다시 켠다.
-- 자기 inbox에 쌓여 있는 새 파일은 그 세션의 첫 처리 대상이다.
+파일을 append하지 않는다. 항상 새 파일로 보낸다. 동시 발신자 충돌 없음, 처리 상태 추적 자유.
 
 ---
 
 ## 참고
 
-- 공통 규칙은 [CLAUDE.md](CLAUDE.md)를 본다.
-- 팀의 첫 멤버는 어드민(Admin)이며 [ClaudeTeam/Admin/](ClaudeTeam/Admin/)에 있다. Admin은 코드를 짜지 않는다 — 프로젝트의 철학·방향·컨벤션을 관리하는 등대 역할이다.
+- 공통 규칙: [CLAUDE.md](CLAUDE.md).
+- Lighthouse(Admin)는 코드를 짜지 않는다 — 프로젝트의 철학·방향·컨벤션을 관리하는 등대 역할.
+- 모든 시행착오 학습은 규칙 끝의 *(이유)* 줄에 박혀 있다 — 그 줄을 읽고도 떼고 싶은 룰이 있으면 Admin에게 letter.

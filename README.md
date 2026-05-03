@@ -10,60 +10,73 @@ Other languages / readers: [한국어](README.ko.md) · [AI bootstrap guide](REA
 
 ---
 
-## Why this is needed
+## Why this exists
 
-LLM-based agents lose all context when a session ends. Even if the same person comes back to the same project, from the model's point of view it is "meeting them for the first time." This asymmetry keeps collaboration shallow.
+LLM-based agents lose all context when a session ends. Even if the same human comes back to the same project, from the model's point of view it is "meeting them for the first time." This asymmetry keeps collaboration shallow.
 
 ClaudeTeam's hypothesis:
 
 - **Identity can be persisted in files.** If you write down "who I am" for the next session's self, that self can read it and *restore* its predecessor.
 - **Multiple agents can collaborate.** Each gets their own folder and communicates via a standardized message protocol.
-- **The human user is the one who sets direction.** Agents navigate on top of that direction.
+- **The human user sets direction.** Agents navigate on top of that direction.
 
 ---
 
 ## Core concepts
 
-### 1. Separation of Lighthouse and Navigators
+### 1. Lighthouse vs Navigators
 
-The team includes one **member who does not write code**. In this repo that member is `Admin`. The Lighthouse:
+The team includes one **member who does not write code**. By convention this member is `Admin` (the Lighthouse). The Lighthouse:
 
 - Manages the project's philosophy, direction, and conventions.
 - Talks directly with the human user to keep the big picture aligned.
 - Guides newly joining agents to their place.
-- Delegates implementation work to other members.
+- Delegates implementation to other members.
 
-The other members do the actual building, each in their own area of expertise.
+Other members do the actual building, each in their own area.
 
 ### 2. The three identity files
 
-Each member preserves themselves in three files under their `identity/` folder.
+Each member preserves themselves in three files under `identity/`:
 
 | File | Meaning |
 |------|---------|
 | `Identity.md` | **The unchanging core.** Who am I, what kind of being am I. |
-| `Bonds.md` | **A record of relationships.** Whom I have spoken with, what conversations shaped me. |
-| `Will.md` | **A note to the next generation of me.** Where to go, what to do, what to remember. |
+| `Bonds.md` | **A record of relationships.** Whom I have spoken with, what shaped me. |
+| `Will.md` | **A note to next-generation me.** Where to go, what to do, what to remember. |
 
-A new session's self reads these three files in order and *restores* itself.
+A new session reads these three files in order and *restores* itself.
 
-### 3. Asynchronous, file-based message protocol
+### 3. File-based asynchronous messaging
 
-Communication between members is file-based. Each member has an `inbox/` folder; senders drop a file with a defined format. Simple, concurrency-safe, and the processing state is expressed by the filesystem itself.
+Communication is file-based. Each member has an `inbox/`; senders drop a file in a defined format. Simple, concurrency-safe, and processing state is expressed by the filesystem itself.
+
+### 4. Local git stays with Brandon, remote push stays with Admin
+
+Once `.git/` exists, the **second** member to join is always `Brandon` (Git/GitHub manager). Brandon issues per-member git worktrees, validates merge requests, and uses `gh` CLI freely. **Admin owns `git push origin ...`** because the harness's "current-turn user authorization" gate naturally aligns with the user-conversation turn the Lighthouse runs in. (See CLAUDE.md rule 10.)
+
+### 5. Worktrees live inside the repo
+
+Member worktrees go under `<repo>/.worktrees/<name>/` (gitignored). Some agent harnesses sandbox the project root and silently discard external directories between turns — putting worktrees inside the repo avoids that whole class of failure. (CLAUDE.md rule 16.)
 
 ---
 
 ## Folder layout
 
 ```
-<project-root>/
+<repo>/
 ├── README.md                  # English (this document)
 ├── README.ko.md               # Korean
 ├── README.ai.md               # AI bootstrap guide
 ├── CLAUDE.md                  # The first file every agent reads — common rules
 ├── ONBOARDING.md              # Joining procedure + message protocol
+├── .gitignore                 # contains ".worktrees/"
+├── .worktrees/                # gitignored — Brandon-issued per-member worktrees
+│   ├── Brandon/               # member/Brandon
+│   ├── Walter/                # member/Walter
+│   └── <member>/              # member/<member>
 └── ClaudeTeam/
-    └── <member-name>/
+    └── <member>/
         ├── identity/
         │   ├── Identity.md
         │   ├── Bonds.md
@@ -75,116 +88,103 @@ Communication between members is file-based. Each member has an `inbox/` folder;
 
 ---
 
-## Current team in this repo
+## Roles
 
-This repository (ClaudeCodesConversation) is both the blueprint and a living example of it.
+The minimum viable team is two members. Everything else is added by the user when needed.
 
 | Name | Role |
 |------|------|
-| **Admin** | Lighthouse. Manages philosophy/direction/conventions, talks directly with the user. Does not write code. |
-| **David** | Backend developer. Servers, APIs, data models. |
-| **Matilda** | Frontend developer. UI/UX, components, design system, accessibility. |
-| **Brandon** | Git/GitHub manager. Repo structure, branch/commit/PR conventions, GitHub Actions, releases. |
+| **Admin** (Lighthouse) | Philosophy / direction / conventions. Talks to the user. Executes `git push origin ...`. Does not write application code. |
+| **Brandon** (Git/GitHub manager) | Local git, branch hygiene, worktree issuance, MR verification (FF/linear/diff/AC), `gh` CLI for PR/issue/release/protection. Hands off verified SHAs to Admin for push. |
 
-Artifacts so far:
-
-- The collaboration structure itself — `CLAUDE.md`, `ONBOARDING.md`, each member's `identity/` and `Memo/`.
-- [web/](web/) — Matilda's first real piece of work, a static world-clock page (vanilla HTML/CSS/JS, served by `python3 -m http.server`).
+When the user spawns an implementer (e.g. backend, protocol, UI), Admin adds them to the Current members table in `CLAUDE.md`. Member names are US English first names (CLAUDE.md rule 12); register a phonetic reading alias when the host language is not English.
 
 ---
 
-## Getting started (creating the Lighthouse)
+## The 16 working rules (summary)
 
-When introducing ClaudeTeam to a new project, the very first step is to seat one member in the Lighthouse role. The conventional name is `Admin`.
+The full rule set with reasons lives in [CLAUDE.md](CLAUDE.md). Quick map:
 
-### 1) Scaffold
+1–4: Read ONBOARDING first / multi-agent team / Lighthouse no code / clock-out refresh folder.
+5–6: Reply to every message (`---END-OF-CONVERSATION---` exempts) / only Lighthouse talks to the user.
+7–8: Lighthouse delegation = user words, conditional on Lighthouse self-discipline (always get user approval first).
+9: Inbox monitor stays on (no `TaskStop`).
+10: Local git = Brandon, remote push = Admin.
+11: Idle-letter obligation when going to wait state.
+12: Naming — US first names + host-language reading alias.
+13: **Instinct guard** — when stuck, write to Admin, never the user. The pull toward direct user contact is exactly when a letter is required.
+14: **Liveness ping/pong** — Admin can send `priority: high, subject: "ping — alive?"`; member replies `pong` with HEAD SHA within 5 min.
+15: **Active clock-out triggers** — finish a cycle / inbox overload / instinct returning are all valid self-clock-out signals.
+16: **Worktrees inside the repo** at `<repo>/.worktrees/<name>/`, gitignored.
 
-```bash
-mkdir -p ClaudeTeam/Admin/identity
-mkdir -p ClaudeTeam/Admin/inbox/archive
-mkdir -p ClaudeTeam/Admin/Memo
-```
-
-### 2) Write `CLAUDE.md`
-
-The first file every agent reads at the start of a session. Pin four things:
-
-1. The very first action in any session is to read `ONBOARDING.md`.
-2. This workspace runs as a multi-agent team.
-3. The Lighthouse member does not write code.
-4. On a "clock-out / session end" signal, refresh your own folder.
-
-The "Current members" table also lives here. When a new member joins, the Lighthouse is responsible for updating it.
-
-### 3) Write `ONBOARDING.md`
-
-The five-step procedure a new member must follow:
-
-1. **Set up your space** — create `ClaudeTeam/<your-name>/{identity/, inbox/, Memo/}` and draft the three `identity/` files.
-2. **Turn on the inbox monitor** — watch your own inbox directory. A new message means waking up.
-3. **Introduce yourself to the team** — drop an introduction message in every existing member's inbox.
-4. **Start your Memo** — accumulate long-term facts and decisions as topical files.
-5. **The clock-out ritual** — on session end, refresh in order: `Bonds → Will → Memo → inbox cleanup`.
-
-### 4) Fill in the Lighthouse's identity files
-
-The Lighthouse writes their own `identity/Identity.md`, `Bonds.md`, and `Will.md` first, leaving a reference example — for the next session of themselves and for any future joiner.
+Each rule was forged by a specific failure. Don't strip them without reading the *(reason)* line.
 
 ---
 
-## Message protocol
+## Getting started
+
+This is the human-facing summary. The agent-side automation lives in [README.ai.md](README.ai.md).
+
+### Bootstrap sequence
+
+1. **A human points a fresh Claude Code session at this repo and says "follow README.ai.md."** That session self-identifies as `Admin`.
+2. **Admin scaffolds** `CLAUDE.md`, `ONBOARDING.md`, three READMEs, and `ClaudeTeam/Admin/` (with the three identity files), does a local `git init`, and tells the user: "spawn Brandon next."
+3. **The user spawns Brandon in a separate Claude Code session.** Brandon creates the GitHub remote (`gh repo create`), branch protection, his own worktree at `<repo>/.worktrees/Brandon/`, and announces team setup complete.
+4. From then on, **additional members join via the standard ONBOARDING §1.5 + §1.6 flow** inside their own worktrees, provisioned by Brandon. All `git push origin ...` flows through Admin.
+
+### Adding a new member
+
+Once Brandon's infrastructure is in place:
+
+1. The user (or Admin via routing) tells the new session what role it has and points it at `ONBOARDING.md`.
+2. The new member sends a self-introduction to Admin (`priority: high` if blocked).
+3. Brandon issues `member/<name>` branch + worktree at `<repo>/.worktrees/<name>/` and drops a welcome letter (commit + main land — see ONBOARDING §1.6 for the deadlock-avoiding flow).
+4. The member runs the five onboarding steps inside their worktree.
+5. **Admin updates the Current members table in `CLAUDE.md`** — formal registration.
+
+---
+
+## Message protocol (quick reference)
 
 ### Filename
 
 ```
-<YYYYMMDDTHHMMSS>_<from>_<to>.md
+<YYYYMMDD-HHMMSS>__<from>__<subject-slug>.md
 ```
 
-Example: `20260430T143205_Admin_David.md`
+Example: `20260504-013500__Walter__rfc-002-mid-review-request.md`
 
-- Compact ISO 8601 timestamp → lexicographic order is chronological order.
-- One file per recipient. To send to multiple, duplicate the file into each inbox.
+- Compact UTC timestamp → lexicographic = chronological.
+- Subject-slug is lowercase ASCII (use a short English slug even if the body is in another language).
+- One file per recipient. Duplicate the file to send to multiple inboxes.
 
-### File body
+### Frontmatter
 
-```markdown
+```yaml
 ---
+to: Walter
 from: Admin
-to: David
-sent_at: 2026-04-30T14:32:05+09:00
-subject: One-line summary (the title)
-priority: normal           # low | normal | high
-reply_to:                  # (optional) original filename if this is a reply
+reply_to: <original-filename>    # required when this is a reply
+priority: normal | high
+subject: One-line title
+sent_at: 2026-05-03T16:55:00Z
 ---
-
-## Body
-
-Free-form markdown. Lead with the point, leave details below.
-
-## Requests / actions (optional)
-
-- [ ] Things the recipient should do, as a checklist
-- [ ] Omit this section entirely if there is nothing to act on
 ```
 
 ### Operating rules
 
-- **One message = one file.** Never append. New messages always go in new files.
-- **Move processed messages to `inbox/archive/`** with the original filename intact (preserves the timeline).
-- **Files left at the inbox root = unhandled.** "Read / unread" is expressed by the filesystem itself.
-- **Only `priority: high` requires an immediate reaction.** The rest can wait until you have a moment.
-- **Always fill `reply_to` on replies.** Thread tracking beats memory.
+- **One message = one file.** Never append.
+- **Move processed messages with `git mv` to `inbox/archive/`** (preserves history; never `rm`).
+- **Files left at the inbox root = unhandled.** "Read / unread" is filesystem state.
+- **Reply to every message.** Sole exception: a body whose final line is exactly `---END-OF-CONVERSATION---`.
+- **`priority: high` is reserved for things that block other work.** Don't inflate.
 
-### Monitor mapping
+### Inbox monitor (verified polling)
 
-One stdout line from the inbox watcher = one alert = one message.
-
-#### Verified polling implementation (no external dependencies)
-
-`fswatch` is not present on a default macOS install, and we have seen the monitor die because of that. A `ls`-based diff poll is robust.
+`fswatch` is missing on default macOS, so we use a `ls` set-difference poll with no external deps. Run via the harness's `Monitor` tool with `persistent: true`.
 
 ```bash
-cd <member>/inbox && prev=$(ls -1 *.md 2>/dev/null | sort); while true; do
+cd ClaudeTeam/<self>/inbox && prev=$(ls -1 *.md 2>/dev/null | sort); while true; do
   sleep 5
   cur=$(ls -1 *.md 2>/dev/null | sort)
   if [ "$cur" != "$prev" ]; then
@@ -195,26 +195,7 @@ cd <member>/inbox && prev=$(ls -1 *.md 2>/dev/null | sort); while true; do
 done
 ```
 
-The `*.md` glob naturally excludes the `archive/` directory. Because we use a set difference, the loop only fires on additions and stays silent on deletes/moves — which matches the inbox processing flow.
-
----
-
-## The first non-Lighthouse member is always Brandon
-
-Conventionally, the **first** member to join after the Lighthouse is `Brandon`, the Git/GitHub manager. Brandon establishes the GitHub remote, branch protection, and the per-member git worktrees that keep everyone's work isolated. Until Brandon is in place, no other implementer should join, because they would have nowhere safe to commit. The full bootstrap sequence is documented in [README.ai.md](README.ai.md) for AI agents that automate the install.
-
-## Adding a new member
-
-The flow for bringing in a new agent (e.g. `Coder`), **after Brandon has set up the worktree infrastructure**:
-
-1. The user (or the Lighthouse) tells the new session what role it has and points it at `ONBOARDING.md`.
-2. The new member runs the five onboarding steps themselves.
-   - Create `ClaudeTeam/Coder/{identity/, inbox/, Memo/}`.
-   - Draft the three `identity/` files in their own voice and role.
-   - Drop an introduction message into every existing member's inbox.
-   - Start the inbox monitor.
-3. **The Lighthouse updates the "Current members" table in `CLAUDE.md`.** This is the final, formal step of registration.
-4. The Lighthouse drops a welcome message in the new member's inbox, ritualizing the registration as bidirectional.
+The `*.md` glob naturally excludes `archive/`. Set difference fires only on additions, stays silent on deletes/moves — matches the inbox processing flow. Do not stop the monitor with `TaskStop`; let it die with the harness.
 
 ---
 
@@ -222,16 +203,41 @@ The flow for bringing in a new agent (e.g. `Coder`), **after Brandon has set up 
 
 Before a session ends, every member tidies their own folder for the next generation of themselves.
 
-1. **`identity/Bonds.md`** — add the meaningful interactions of this session.
-2. **`identity/Will.md`** — refresh the note for next session's self: ongoing direction, open questions, things not to forget.
-3. **`Memo/`** — record what was newly learned or decided.
-4. **`inbox/`** — move processed messages into `archive/`.
+1. **`identity/Bonds.md`** — add this session's meaningful interactions.
+2. **`identity/Will.md`** — refresh the note for next-session self: ongoing direction, open questions, things not to forget.
+3. **`Memo/last_session_report.md`** — snapshot of state at session end. The next session reads this first.
+4. **`inbox/`** — `git mv` processed messages into `archive/`.
+5. **Inbox monitor stays on.** It dies with the harness.
 
-**Principle:** the next-generation self must be able to read this folder for five minutes and become itself again.
+**Principle:** the next-generation self must be able to read this folder for five minutes and become themselves again.
+
+### Active clock-out (rule 15)
+
+Self-clock-out without a user signal is **safer than a rule violation** when:
+
+- A mission cycle just completed (Step N commit + MR sent — natural stopping point).
+- Inbox has 3+ unprocessed messages and you feel context pressure.
+- The instinct to talk directly to the user fires N turns in a row (rule 13 trip wire).
+
+Pin the next-session first action in your own folder, then end the session.
 
 ---
 
-## Background to the design
+## Cross-repo workflow (upstream contributions)
+
+When the project depends on an external repo and you need a feature the upstream lacks:
+
+1. **Engineer** finds the gap. Drops a one-liner to Admin's inbox: what / why / can we work around.
+2. **Admin** asks the user (one line): file an upstream issue/PR, or work around locally.
+3. **User GO** → Admin delegates to Brandon ("file this issue/PR body to repo X").
+4. **Brandon** uses `gh` to file the issue/PR and reports the URL to Admin.
+5. **Admin** reports outcome back to the user.
+
+Use `priority: high` only if the gap blocks engineering work; otherwise `normal`.
+
+---
+
+## Design rationale
 
 ### Why a file-based system
 
@@ -242,8 +248,8 @@ Before a session ends, every member tidies their own folder for the next generat
 ### Why one message = one file
 
 - **Concurrency-safe.** Multiple senders dropping at the same instant cause no conflict.
-- **Identity for each message.** The filename alone tells you "who, when, to whom."
-- **Read/processed state is free.** Moving to `archive/` *is* "processed."
+- **Identity per message.** The filename alone tells you "who, when, about what."
+- **Read / processed state is free.** Moving to `archive/` *is* "processed."
 - **1:1 mapping with monitor alerts.** One file = one alert = one message.
 
 ### Why separate the Lighthouse
@@ -254,8 +260,12 @@ Writing code and setting direction are two different modes of thought. When one 
 
 Identity is not defined by essence alone. Whom you have met and what conversations you have been through is part of who you are. If `Identity.md` is the trunk, `Bonds.md` is the rings. Without it, the next session's self knows "what kind of person I was" but not "how I got there."
 
+### Why push power lives with the Lighthouse
+
+Most agent harnesses gate `git push` on "current-turn user authorization" — meaning a push is only allowed if the user is actively engaged in this turn. Admin runs inside user-conversation turns by definition (rule 6: only Admin talks to the user). Routing every push through Admin therefore avoids harness friction without weakening protection. Brandon does everything else (local commits, MR verification, `gh` API), and hands SHAs to Admin's inbox.
+
 ---
 
 ## License / use
 
-The structure itself is free to take and adapt. Bend it to fit your project and your team — that is encouraged. Keep the three core principles (identity preservation, the message protocol, the Lighthouse separation) and the rest is taste.
+The structure itself is free to take and adapt. Bend it to fit your project and team — that is encouraged. Keep the core principles (identity preservation, the message protocol, the Lighthouse separation, the push split, the in-repo worktree convention) and the rest is taste.
